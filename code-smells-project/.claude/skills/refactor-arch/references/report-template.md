@@ -46,8 +46,10 @@ Total: <a+b+c+d> findings
 ================================
 ```
 
-A linha `Deprecated APIs: none detected` só aparece quando **não** há finding AP-15; nesse caso
-ela fica imediatamente antes do separador final do `Total`.
+A linha `Deprecated APIs: none detected` só aparece quando **não** há finding AP-15. Ela nunca
+fica entre findings: vem **depois do último finding** (normalmente um LOW), separada dele por uma
+linha em branco e seguida diretamente do separador `================================` e do
+`Total`, exatamente como no template acima.
 
 ## 2. Regras de preenchimento
 
@@ -58,7 +60,7 @@ ela fica imediatamente antes do separador final do `Total`.
 | `Files:` | `FILES` e `LOC` do `count-source-files.sh` |
 | `## Summary` | contagem de findings por severidade; as quatro severidades sempre presentes (use `0`) |
 | Título | `### [SEV] <name do catálogo> (AP-NN)`; severidade e nome copiados do catálogo |
-| `File:` | caminhos relativos ao diretório do projeto; linha única `arquivo:42` ou faixa `arquivo:10-25`; várias ocorrências separadas por `, ` |
+| `File:` | caminhos relativos ao diretório do projeto; linha única `arquivo:42` ou faixa `arquivo:10-25`; várias ocorrências separadas por `, `, **repetindo o nome do arquivo em cada uma** (`a.py:10, a.py:42-48, b.py:7` — nunca `a.py:10, 42-48`) |
 | `Description:` | português, específico: cita o identificador/trecho encontrado |
 | `Impact:` | consequência concreta para segurança, manutenção, testes ou desempenho |
 | `Recommendation:` | ação concreta + `TP-NN` do playbook; para AP-15, o equivalente moderno |
@@ -86,10 +88,12 @@ Recommendation: Usar placeholders do driver com parâmetros separados em todas a
 
 ## 4. Autoverificação antes de imprimir
 
-- [ ] Cada `File:` aponta para linhas que existem e mostram o problema descrito.
+- [ ] Cada `File:` aponta para linhas que existem e mostram o problema descrito, com o nome do
+      arquivo em cada localização.
 - [ ] Nenhum finding duplicado para a mesma ocorrência.
 - [ ] Ordem CRITICAL → HIGH → MEDIUM → LOW.
 - [ ] Summary confere com a contagem de blocos e com o `Total`.
 - [ ] Todo `AP-NN` existe no catálogo e todo `TP-NN` no playbook.
-- [ ] AP-15 presente com equivalente moderno, ou linha `Deprecated APIs: none detected`.
+- [ ] AP-15 presente com equivalente moderno, ou linha `Deprecated APIs: none detected` depois
+      do último finding e imediatamente antes do separador do `Total`.
 - [ ] Linha `Project:` igual ao nome do diretório.

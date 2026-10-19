@@ -90,6 +90,12 @@ Classifique com base na distribuição real das responsabilidades:
 | Camadas parciais | existem pastas/módulos como `models/`, `routes/`, `services/`, `utils/`, mas rotas ainda acessam dados e contêm regras |
 | MVC/camadas | rotas finas, controllers/services com regras, models com acesso a dados, config separada |
 
+A classificação depende de **onde estão as responsabilidades**, não dos nomes dos arquivos: um
+projeto com arquivos chamados `controllers`/`models` em que o módulo de dados também aplica regras
+de negócio, as rotas ficam no entry point e não há config nem tratamento central de erros é
+**Monolítica**. "Camadas parciais" exige pastas/pacotes por camada com ao menos uma camada
+cumprindo seu papel.
+
 Descreva em uma frase: `<classificação> — <evidência principal>` (ex.: "Monolítica — rotas, SQL e
 regras em 3 arquivos sem separação de camadas").
 
