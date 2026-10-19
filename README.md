@@ -446,3 +446,75 @@ A skill deve atingir os seguintes mínimos em **todos os 3 projetos**:
 - **Projetos diferentes exigem adaptação** — a Fase 3 de um projeto já parcialmente organizado não vai ter as mesmas transformações de um monolito. Sua skill deve se adaptar ao contexto.
 - **Pedir confirmação na Fase 2 é obrigatório** — o humano deve revisar o relatório antes de qualquer modificação.
 - **Consulte as referências do curso** — revise a documentação oficial da ferramenta escolhida e os materiais das aulas para relembrar a estrutura e anatomia de uma skill.
+
+---
+
+# Entrega do Desafio
+
+> As seções abaixo documentam a solução. O texto acima é o enunciado original (commit `6d1ce62`),
+> preservado sem alterações.
+
+## Análise Manual
+
+Problemas identificados manualmente, antes da criação da skill, lendo o código dos 3 projetos na
+linha de base do código (commit `6d1ce62`). As localizações `arquivo:linha` são relativas ao
+diretório de cada projeto. A coluna **Finding da skill (matched_by)** relaciona cada problema ao
+finding correspondente no relatório gerado pela skill (`reports/audit-project-N.md`).
+
+### Projeto 1 — code-smells-project (Python/Flask)
+
+| # | Severidade | Problema | Arquivo:linha | Justificativa | Finding da skill (matched_by) |
+|---|---|---|---|---|---|
+| 1 | CRITICAL | SQL Injection por concatenação de strings | `models.py:28`, `models.py:47-50`, `models.py:58-60`, `models.py:110`, `models.py:291` | Valores vindos do request (inclusive e-mail/senha do login e termo de busca) são concatenados no SQL; permite bypass de login e leitura/alteração arbitrária do banco. | |
+| 2 | CRITICAL | Credenciais/segredos hardcoded | `app.py:7`, `controllers.py:289` | `SECRET_KEY` fixa no código e versionada; qualquer pessoa com acesso ao repositório pode forjar sessões. | |
+| 3 | CRITICAL | Endpoints administrativos sem proteção | `app.py:47-57`, `app.py:59-78` | `/admin/reset-db` apaga todas as tabelas e `/admin/query` executa SQL arbitrário enviado no corpo, ambos sem autenticação. | |
+| 4 | CRITICAL | God file: acesso a dados + regra de negócio + formatação de 3 domínios | `models.py:1-314` | Produtos, usuários e pedidos (queries, cálculo de desconto, baixa de estoque, montagem de dicionários) no mesmo módulo; impossível testar ou alterar um domínio isoladamente. | |
+| 5 | CRITICAL | Senhas armazenadas e comparadas em texto puro | `database.py:76-78`, `models.py:109-111`, `models.py:126-129` | Senhas gravadas sem hash e comparadas direto no SQL; vazamento do banco expõe todas as credenciais. | |
+| 6 | HIGH | Exposição de dados sensíveis nas respostas | `models.py:83`, `models.py:99`, `controllers.py:285-289` | `GET /usuarios` devolve o campo `senha`; `/health` devolve `secret_key`, `db_path` e flag de debug. | |
+| 7 | HIGH | Modo debug e bind amplo ativos por padrão | `app.py:8`, `app.py:88` | `debug=True` com `host="0.0.0.0"` expõe o debugger interativo (execução de código) na rede. | |
+| 8 | HIGH | Estado global mutável compartilhado | `database.py:4-10` | Conexão única global com `check_same_thread=False` compartilhada por todas as requisições; acoplamento e condições de corrida. | |
+| 9 | MEDIUM | N+1 queries (query dentro de laço) | `models.py:187-193`, `models.py:219-225` | Para cada pedido uma query de itens e, para cada item, outra de produto; custo cresce linearmente com o volume. | |
+| 10 | MEDIUM | Código duplicado | `controllers.py:26-50`, `controllers.py:66-90`, `models.py:12-21`, `models.py:31-40`, `models.py:304-313` | Validação de produto e mapeamento linha→dicionário copiados; correções precisam ser replicadas e divergem (o update não valida o nome). | |
+| 11 | MEDIUM | Tratamento de erros genérico e espalhado | `controllers.py:10-12`, `controllers.py:21-22`, `controllers.py:185-186` | Cada handler captura `Exception` e devolve `str(e)` com 500, vazando detalhes internos; não há handler centralizado. | |
+| 12 | LOW | `print` no lugar de logger | `controllers.py:8`, `controllers.py:57`, `controllers.py:208-210` | Sem níveis nem destino configurável; mensagens de "envio" de e-mail/SMS simuladas via `print`. | |
+| 13 | LOW | Magic numbers na regra de desconto | `models.py:257-262` | Faixas `10000/5000/1000` e taxas `0.1/0.05/0.02` sem nome; regra de negócio opaca. | |
+| 14 | LOW | Imports não utilizados | `models.py:2`, `database.py:2` | `sqlite3` em `models.py` e `os` em `database.py` nunca são usados; ruído e acoplamento aparente. | |
+
+### Projeto 2 — ecommerce-api-legacy (Node.js/Express)
+
+| # | Severidade | Problema | Arquivo:linha | Justificativa | Finding da skill (matched_by) |
+|---|---|---|---|---|---|
+| 1 | CRITICAL | Credenciais/segredos hardcoded | `src/utils.js:1-7` | Senha do banco e chave do gateway de pagamento (`pk_live_…`) versionadas no código. | |
+| 2 | CRITICAL | God class: banco, schema, seed, rotas e regra de negócio na mesma classe | `src/AppManager.js:4-139` | `AppManager` cria o banco, define tabelas, popula dados, registra rotas e implementa checkout e relatório; nenhuma separação de camadas. | |
+| 3 | CRITICAL | Hash de senha fraco/caseiro | `src/utils.js:17-23`, `src/AppManager.js:68` | `badCrypto` é base64 truncado (reversível e sem salt) e usa senha padrão `123456` quando ausente. | |
+| 4 | CRITICAL | Endpoints administrativos sem proteção | `src/AppManager.js:80`, `src/AppManager.js:131` | Relatório financeiro e exclusão de usuários acessíveis sem autenticação/autorização. | |
+| 5 | HIGH | Dados sensíveis em logs | `src/AppManager.js:45` | Número completo do cartão e chave do gateway impressos no console a cada checkout. | |
+| 6 | HIGH | Regra de negócio dentro do handler da rota | `src/AppManager.js:28-78` | Aprovação de pagamento, criação de usuário, matrícula e auditoria implementadas no callback da rota. | |
+| 7 | HIGH | Estado global mutável | `src/utils.js:9-15` | `globalCache` e `totalRevenue` exportados e mutados por qualquer módulo; cache sem limite nem dono. | |
+| 8 | MEDIUM | Callback hell | `src/AppManager.js:37-77`, `src/AppManager.js:83-128` | Até 5 níveis de callbacks aninhados; fluxo e tratamento de erros difíceis de seguir e testar. | |
+| 9 | MEDIUM | N+1 queries | `src/AppManager.js:92`, `src/AppManager.js:104-106` | Uma query de matrículas por curso e duas por matrícula (usuário e pagamento). | |
+| 10 | MEDIUM | Erros ignorados / tratamento inconsistente | `src/AppManager.js:92-93`, `src/AppManager.js:133-135` | O `err` dos callbacks é ignorado (acesso a `enrollments.length` com `undefined` derruba o processo); delete responde sucesso mesmo em erro. | |
+| 11 | MEDIUM | Validação de entrada ausente | `src/AppManager.js:35`, `src/AppManager.js:132` | Só checa presença de campos; formato de e-mail, cartão e id não são validados. | |
+| 12 | LOW | Nomes pobres/abreviados | `src/AppManager.js:29-33` | `u`, `e`, `p`, `cid`, `cc` escondem o significado dos dados. | |
+| 13 | LOW | `console.log` no lugar de logger | `src/utils.js:13`, `src/app.js:13` | Logs sem nível nem destino configurável. | |
+| 14 | LOW | Código morto e imports não usados | `src/AppManager.js:2`, `src/utils.js:10` | `totalRevenue` é importado e exportado mas nunca usado/atualizado. | |
+| 15 | LOW | Magic numbers/strings | `src/utils.js:19`, `src/AppManager.js:46` | Laço de `10000` iterações e regra "cartão começando com `4`" sem nome. | |
+
+### Projeto 3 — task-manager-api (Python/Flask)
+
+| # | Severidade | Problema | Arquivo:linha | Justificativa | Finding da skill (matched_by) |
+|---|---|---|---|---|---|
+| 1 | CRITICAL | Credenciais/segredos hardcoded | `app.py:13`, `services/notification_service.py:7-10` | `SECRET_KEY` e usuário/senha SMTP versionados no código. | |
+| 2 | CRITICAL | Hash de senha fraco (MD5 sem salt) | `models/user.py:27-32` | MD5 é quebrável por força bruta/rainbow tables; não é algoritmo de senha. | |
+| 3 | HIGH | Exposição de dados sensíveis nas respostas | `models/user.py:16-25`, `routes/user_routes.py:85`, `routes/user_routes.py:209` | `to_dict()` inclui o hash da senha, devolvido no cadastro, atualização e login. | |
+| 4 | HIGH | Regra de negócio nas rotas (camada de controller ausente) | `routes/report_routes.py:12-101`, `routes/task_routes.py:85-154` | Cálculo de relatórios, validações e criação de entidades direto nos handlers, apesar de existirem `models/` e `services/`. | |
+| 5 | HIGH | Modo debug e bind amplo ativos por padrão | `app.py:34` | `debug=True` com `host='0.0.0.0'` expõe o debugger interativo na rede. | |
+| 6 | MEDIUM | N+1 queries | `routes/task_routes.py:41-51`, `routes/report_routes.py:55-56`, `routes/report_routes.py:161-163` | Para cada task busca usuário e categoria; para cada usuário/categoria uma nova contagem. | |
+| 7 | MEDIUM | APIs deprecated | `models/task.py:15-16`, `routes/task_routes.py:31`, `routes/user_routes.py:29` | `datetime.utcnow()` é obsoleto desde Python 3.12 (usar `datetime.now(timezone.utc)`); `Query.get()` é API legada do SQLAlchemy 2.x (usar `db.session.get()`). | |
+| 8 | MEDIUM | Código duplicado | `routes/task_routes.py:30-39`, `routes/task_routes.py:71-80`, `routes/user_routes.py:171-180`, `routes/report_routes.py:33-37` | Cálculo de "atrasada" repetido em 4 lugares enquanto `Task.is_overdue()` (`models/task.py:50-60`) não é usado. | |
+| 9 | MEDIUM | Tratamento de erros genérico (`except:` nu) | `routes/task_routes.py:62`, `routes/task_routes.py:137`, `routes/report_routes.py:186` | Captura tudo (inclusive `KeyboardInterrupt`) e esconde a causa; sem handler centralizado. | |
+| 10 | MEDIUM | Validação de entrada ausente | `routes/report_routes.py:196-202`, `routes/task_routes.py:113` | `PUT /categories/<id>` não verifica corpo nulo; prioridade não numérica causa `TypeError` (500). | |
+| 11 | LOW | Imports não utilizados | `app.py:7`, `routes/task_routes.py:7`, `utils/helpers.py:3-7` | `os`, `sys`, `json`, `time`, `math`, `hashlib` importados sem uso. | |
+| 12 | LOW | `print` no lugar de logger | `routes/task_routes.py:149`, `routes/user_routes.py:83`, `utils/helpers.py:39` | Logs sem nível nem destino configurável. | |
+| 13 | LOW | Magic numbers ignorando constantes existentes | `routes/task_routes.py:96-114`, `routes/user_routes.py:64` | Limites `3`, `200`, `1..5` e `4` repetidos enquanto `utils/helpers.py:110-116` define as constantes. | |
+| 14 | LOW | Nomes pobres | `routes/report_routes.py:24-28` | `p1`…`p5` escondem a semântica de prioridade. | |
