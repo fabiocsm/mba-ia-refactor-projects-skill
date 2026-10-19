@@ -1,29 +1,3 @@
-<!--
-Sync Impact Report
-==================
-Version change: 2.1.0 → 2.2.0
-Bump rationale: MINOR — expansão material de regras do Princípio VII a partir do
-/speckit-analyze (2026-10-19): permissão explícita e limitada para arquivos efêmeros em diretório
-temporário do SO (antes implicitamente proibidos), novas regras de artefatos de runtime e de
-verificação de porta, mensagem de bloqueio no lugar da pergunta quando não há ponto de
-restauração, e glossário obrigatório para "linha de base". Nenhum princípio removido.
-
-Modified principles:
-- VII. Refatoração Segura e Comprovada — reversibilidade (bloqueio no lugar da pergunta; ponto de
-  restauração = HEAD na confirmação; arquivos efêmeros em temp do SO); novas regras "Artefatos de
-  runtime" e "Porta da aplicação"; texto da evidência com "linha de base de comportamento".
-
-Added sections: nenhuma (novo item "Glossário obrigatório" em Restrições do Entregável).
-Removed sections: nenhuma.
-Modified sections: Restrições do Entregável ("Linha de base do código", glossário); Fluxo de
-Trabalho e Quality Gates (etapa 4 e etapa 5.1/5.4 com "linha de base do código").
-
-Templates/commands: não modificados (leem a constituição em tempo de execução).
-Dependent artifacts: specs/001-refactor-arch-skill/{spec,plan,research,data-model,quickstart,
-tasks}.md e contracts/ ✅ alinhados na mesma correção.
-Follow-up TODOs: nenhum.
--->
-
 # Constituição do Projeto refactor-arch (Desafio de Skills — MBA IA)
 
 Este repositório **não** tem como produto final um sistema. O produto avaliado é a skill
