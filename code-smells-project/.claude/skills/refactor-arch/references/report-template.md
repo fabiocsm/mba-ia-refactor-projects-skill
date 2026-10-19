@@ -38,18 +38,22 @@ Description: <API obsoleta usada>
 Impact: <consequência>
 Recommendation: substituir por <equivalente moderno> (TP-10)
 
-<demais findings>
+<demais findings MEDIUM>
 
 Deprecated APIs: none detected
+
+### [LOW] <nome do anti-pattern> (AP-NN)
+...
+
 ================================
 Total: <a+b+c+d> findings
 ================================
 ```
 
-A linha `Deprecated APIs: none detected` só aparece quando **não** há finding AP-15. Ela nunca
-fica entre findings: vem **depois do último finding** (normalmente um LOW), separada dele por uma
-linha em branco e seguida diretamente do separador `================================` e do
-`Total`, exatamente como no template acima.
+A linha `Deprecated APIs: none detected` só aparece quando **não** há finding AP-15 e ocupa o
+lugar onde ele estaria: depois do último finding MEDIUM e antes do primeiro LOW (sem LOW, logo
+antes do separador do `Total`). Os findings LOW continuam depois dela — ela não encerra o
+relatório.
 
 ## 2. Regras de preenchimento
 
@@ -94,6 +98,8 @@ Recommendation: Usar placeholders do driver com parâmetros separados em todas a
 - [ ] Ordem CRITICAL → HIGH → MEDIUM → LOW.
 - [ ] Summary confere com a contagem de blocos e com o `Total`.
 - [ ] Todo `AP-NN` existe no catálogo e todo `TP-NN` no playbook.
-- [ ] AP-15 presente com equivalente moderno, ou linha `Deprecated APIs: none detected` depois
-      do último finding e imediatamente antes do separador do `Total`.
+- [ ] AP-15 presente com equivalente moderno, ou linha `Deprecated APIs: none detected` no lugar
+      dele (após os MEDIUM, antes dos LOW).
+- [ ] Todos os findings de todas as severidades presentes (inclusive os LOW após a linha de
+      APIs deprecated).
 - [ ] Linha `Project:` igual ao nome do diretório.

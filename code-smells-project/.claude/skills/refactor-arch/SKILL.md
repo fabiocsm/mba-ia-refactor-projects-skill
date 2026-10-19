@@ -131,12 +131,14 @@ endpoints declarados no código.
 2. Audite **todos** os arquivos-fonte listados na Fase 1 conforme "Como auditar" do catálogo.
    Verifique cada `arquivo:linha` citada antes de incluí-la.
 3. Monte o relatório no formato exato do template e passe pela autoverificação do template.
-4. Imprima o relatório completo.
-5. Resolva o caminho: se `$ARGUMENTS` for um inteiro positivo, use-o como `N`; se estiver vazio,
+4. Resolva o caminho: se `$ARGUMENTS` for um inteiro positivo, use-o como `N`; se estiver vazio,
    omita; se for outro valor, imprima `Warning: argument '<valor>' ignored (expected a report number).`
    e omita. Execute `resolve-output-path.sh audit <nome-do-diretório> [N]`.
-6. Grave em `PATH_OUT` (crie `reports/` se não existir) o relatório **idêntico** ao impresso e
-   imprima `Report saved to: <PATH_OUT relativo à raiz>`. Guarde `N` para a evidência.
+5. Grave o relatório em `PATH_OUT` (crie `reports/` se não existir). Guarde `N` para a evidência.
+6. **Releia o arquivo gravado** e imprima-o na resposta **integralmente**, copiando do arquivo —
+   todos os findings de todas as severidades, sem resumir nem omitir —, seguido de
+   `Report saved to: <PATH_OUT relativo à raiz>`. Confira que o número de findings impressos é o
+   `Total`.
 7. Gate de confirmação, conforme o `STATUS` do ponto de restauração da Fase 1:
    - `STATUS` ≠ `ok`: imprima, **no lugar da pergunta**,
      `Phase 3 is blocked: <motivo: no git repository | <k> pending changes outside .claude/>. Commit or discard pending changes, then re-run.`

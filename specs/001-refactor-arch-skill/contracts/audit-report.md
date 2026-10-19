@@ -46,4 +46,4 @@ Total: <a+b+c+d> findings
 | Toda localização existe | `sed -n '<linha>p' <arquivo>` mostra o problema |
 | ≥ 5 findings e ≥ 1 CRITICAL/HIGH | critérios de aceite |
 | Deprecated API: `Recommendation` cita o equivalente moderno | quando presente |
-| Nenhuma API deprecated encontrada | linha `Deprecated APIs: none detected` antes de `Total` |
+| Nenhuma API deprecated encontrada | linha `Deprecated APIs: none detected` no lugar do finding AP-15 (após os MEDIUM, antes dos LOW), portanto antes de `Total` |
