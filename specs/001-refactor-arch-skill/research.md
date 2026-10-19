@@ -98,7 +98,7 @@ Anthropic e inspeção dos 3 projetos-alvo.
   documentação e arquivos de exemplo de requisições.
 - **Rationale**: reproduz o exemplo do enunciado (projeto 1 → "4 files analyzed": `app.py`,
   `controllers.py`, `models.py`, `database.py`). Contagens esperadas na linha de base do código: projeto 1 =
-  4, projeto 2 = 3 (`src/*.js`), projeto 3 = 13 (`.py`, incluindo `__init__.py` e `seed.py`).
+  4, projeto 2 = 3 (`src/*.js`), projeto 3 = 15 (`.py`, incluindo os 4 `__init__.py` e `seed.py`).
 - **Alternatives considered**: contar todos os arquivos (incluiria `package-lock.json` com 2.300
   linhas e distorceria "~linhas de código").
 

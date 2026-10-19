@@ -83,7 +83,7 @@ Verificar em cada execução:
 
 | Momento | Verificação | Critério |
 |---|---|---|
-| Fim da Fase 1 | banner com linguagem, framework, domínio; `Source files` = 4 / 3 / 13 | SC-001 |
+| Fim da Fase 1 | banner com linguagem, framework, domínio; `Source files` = 4 / 3 / 15 | SC-001 |
 | Fim da Fase 2 | relatório conforme [audit-report.md](./contracts/audit-report.md); ≥ 5 findings; ≥ 1 CRITICAL/HIGH | SC-002, SC-003 |
 | Fim da Fase 2 | `reports/audit-project-N.md` existe e é idêntico ao impresso | SC-005 |
 | Na pergunta | `git status --porcelain -- <projeto>` vazio | SC-005 |

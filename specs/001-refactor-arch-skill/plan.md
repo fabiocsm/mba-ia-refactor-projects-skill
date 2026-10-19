@@ -44,7 +44,7 @@ linhas e referências carregadas por fase para economizar contexto.
 relatório); pausa obrigatória; agnosticismo; zero anti-patterns pós-refatoração; contrato de
 endpoints preservado; ambiente isolado; execução limpa; nenhuma edição manual no código gerado.
 
-**Scale/Scope**: 3 projetos, ~2,1 mil linhas de código-fonte; 19 / 3 / 22 endpoints; 4 / 3 / 13
+**Scale/Scope**: 3 projetos, ~2,1 mil linhas de código-fonte; 19 / 3 / 22 endpoints; 4 / 3 / 15
 arquivos-fonte; 2–4 iterações esperadas.
 
 ## Constitution Check

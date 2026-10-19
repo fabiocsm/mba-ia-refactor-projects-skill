@@ -18,18 +18,22 @@ Regras comuns (constituição, Princípio V):
 | `check-restore-point.sh` | `<project-dir>` | `GIT=yes\|no`, `STATUS=ok\|dirty\|no-git`, `HEAD=<sha>`, `PENDING=<n>` + arquivos | leitura |
 | `resolve-output-path.sh` | `<audit\|validation> <project-name> [N]` | `ROOT=<dir>`, `N=<n>`, `PATH_OUT=<arquivo>` | leitura |
 | `workspace-artifacts.sh` | `snapshot <project-dir> <state-file>` \| `diff <project-dir> <state-file>` | `diff`: um caminho novo por linha (exclui `.claude/` e o ambiente isolado) | leitura (state-file em diretório temporário) |
-| `check-port.sh` | `<host> <port>` | `PORT_FREE=yes` (exit 0) ou `PORT_FREE=no` (exit 1) — usa `curl` (conexão recusada = livre) | leitura |
+| `check-port.sh` | `<host> <port>` | `PORT_FREE=yes` (exit 0) ou `PORT_FREE=no` (exit 1) + `LISTENER_PIDS=<pids>` quando `lsof` existe — usa `curl` (conexão recusada = livre) | leitura |
 | `wait-for-http.sh` | `<url> [timeout-seconds] [pid]` | `READY=yes` (exit 0); `READY=no` (exit 1) por timeout ou se o `pid` informado morrer antes de responder | leitura |
-| `probe-endpoints.sh` | `<base-url> <requests-file> <out-file>` | `out-file`: por requisição, bloco `### <#> <METHOD> <PATH>`, `STATUS=<code>`, corpo bruto | requisições HTTP locais |
+| `probe-endpoints.sh` | `<base-url> <requests-file> <out-file>` | `out-file`: por requisição, bloco `### <#> <METHOD> <PATH>`, `STATUS=<code>`, `CONTENT_TYPE=<tipo>`, corpo bruto; stdout `PROBED=<n>`, `OUT=<arquivo>` | requisições HTTP locais |
 | `revert-project.sh` | `<project-dir>` | `REVERTED=yes`, `HEAD=<sha>` | destrutivo, restrito ao projeto; exclui `.claude/`; não remove arquivos ignorados |
 
 ## Formato de `requests-file`
 
 ```text
-# method<TAB>path<TAB>body-file-or-dash
+# method<TAB>path<TAB>body-file-or-dash[<TAB>headers-file-or-dash]
 GET	/items	-
 POST	/items	/tmp/refactor-arch.XXXX/body-03.json
+GET	/admin/stats	-	/tmp/refactor-arch.XXXX/headers-admin.txt
 ```
+
+A 4ª coluna (opcional) aponta para um arquivo com um cabeçalho `Nome: valor` por linha — usada
+para exercitar endpoints protegidos por credencial após uma correção de segurança declarada.
 
 Corpos, respostas e state-files ficam no mesmo diretório temporário do SO (`mktemp -d`, fora do
 repositório), removido pela skill ao final da Fase 3 com sucesso ou falha.
