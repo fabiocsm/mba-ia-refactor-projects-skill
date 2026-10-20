@@ -518,8 +518,8 @@ const report = [...byBook.values()];
   obrigatórios, tipos, faixas e formatos — **todo** campo do request usado em comparação,
   aritmética, `len()`, conversão ou indexação tem o tipo verificado antes do uso (número:
   `int`/`float` excluindo `bool`; texto: `str`), inclusive campos de elementos de listas; regras
-  de formato que o original já tinha são mantidas e aplicadas de forma consistente em todos os
-  endpoints do mesmo campo, sem criar rejeições novas para entradas que o original aceitava; reproduzir na mesma ordem as validações e mensagens
+  de formato que o original já tinha são mantidas exatamente onde existiam, sem criar rejeições
+  novas para entradas que o original aceitava; reproduzir na mesma ordem as validações e mensagens
   originais; lançar `ValidationError` (400) para o resto; chamar o validador na rota antes do
   controller.
 

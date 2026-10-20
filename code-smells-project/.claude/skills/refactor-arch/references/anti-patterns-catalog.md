@@ -317,14 +317,14 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
   - Conversão de query/path param (`int()`, `float()`, `Number()`) sem tratar valor inválido.
   - Campo cujo uso pode gerar erro de execução — comparação, aritmética, `len()`, conversão,
     chamada de método, indexação — sem verificação de tipo antes (gera 500 com entrada inválida).
-  - Regra de formato aplicada a um campo em um endpoint e ausente para o mesmo campo em outro
-    (ex.: e-mail validado no cadastro e não na atualização).
 - **Falsos positivos:**
   - Validação centralizada (validador/schema) chamada na borda antes do controller.
   - Tipos já garantidos pelo framework (`<int:id>` no Flask, conversores de rota).
   - Campo apenas repassado à persistência sem uso que possa falhar, ou ausência de regra de
     formato que o original também não tinha: passar a rejeitar entradas que o original aceitava
     mudaria o contrato (`mvc-guidelines.md` §5). Mantenha a regra de formato que já existia.
+  - Diferenças de regras entre endpoints que já existiam no original (ex.: criação valida um
+    limite que a atualização não valida): uniformizar mudaria o contrato.
 - **Impacto:** erros 500 com entradas inválidas, dados corrompidos, superfície de ataque maior.
 
 ### AP-13 Scattered or Generic Error Handling
