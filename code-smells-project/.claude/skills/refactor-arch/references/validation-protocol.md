@@ -145,7 +145,11 @@ agentes do Claude Code), que recebe apenas: o caminho do projeto, o caminho de
 linha de base com seus shapes e a instrução de ler o código original com `git show HEAD:<arquivo>`
 (somente leitura). O subagente não altera nem cria arquivos e não executa código do projeto — nada
 de `py_compile`, linters, compiladores ou ferramentas que gravem caches; só leitura de arquivos,
-`git show` e buscas: devolve a lista de findings e de divergências
+`git show` e buscas. Ele reporta **apenas** (a) findings do catálogo, cada um com `AP-NN`, o sinal
+de detecção que casa e `arquivo:linha`, já descontados os falsos positivos; e (b) divergências de
+contrato dentro do escopo do passo 3. Sugestões de estilo ou melhorias fora do catálogo não são
+reportadas. **Limite de 3 rodadas:** se a 3ª rodada ainda trouxer itens, corrija-os e siga para a
+validação (§7.2) — a reauditoria oficial decide o resultado: devolve a lista de findings e de divergências
 de contrato com `arquivo:linha`. Você corrige e chama um **novo** subagente até a resposta vir
 vazia. Se a ferramenta de agentes não estiver disponível, faça os passos você mesmo, com o mesmo
 rigor, e registre isso na evidência (`Reviewer: self`).
@@ -159,9 +163,12 @@ rigor, e registre isso na evidência (`Reviewer: self`).
    `len()`, conversão, indexação, inclusive em elementos de listas) precisa de regra de tipo;
    regras de formato/faixa que o original tinha precisam ser mantidas. Campo sem a regra exigida
    é AP-12: corrija o validador. Não acrescente rejeições que o original não fazia (contrato).
-3. **Conferência de contrato por leitura de código** (inclusive caminhos de erro que a linha de
-   base não exercita — para cada `return`/erro do handler original, o refatorado devolve o mesmo
-   status e as mesmas chaves no mesmo cenário): para cada endpoint do inventário, compare
+3. **Conferência de contrato por leitura de código**, incluindo as respostas **explícitas** do
+   handler original que a linha de base não exercita (ex.: um `return` 404 de "não encontrado" ou
+   um 400 de validação com sua mensagem): no mesmo cenário, o refatorado devolve o mesmo status e
+   as mesmas chaves. Fora do escopo: comportamento do original com entradas malformadas que ele
+   tratava por acidente (exceções → 5xx, coerções implícitas de tipo, ordem incidental de
+   checagens) — ali a correção de AP-12/AP-13 prevalece (`mvc-guidelines.md` §5): para cada endpoint do inventário, compare
    status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
    ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
    exatamente o shape original.
