@@ -21,6 +21,7 @@ relatório.
 - Boot command: `<comando>`
 - Port: <porta> (free before boot: yes)
 - Runtime artifacts removed: <lista ou "none">
+- Code fingerprint: <FP_START> at first boot / <FP_END> at end (unchanged: yes \| no)
 
 ## Boot
 ```text
@@ -56,5 +57,6 @@ Remaining anti-patterns: 0 \| <lista de findings com localização>
 |---|---|
 | 100% dos endpoints do inventário na tabela | contagem de linhas = `Endpoints` da Fase 1 |
 | `Result: CLEAN` ⇒ todas as linhas `✓` ou `declared`, reauditoria `0` | leitura |
-| `declared` só com linha correspondente em "Declared contract changes" | leitura |
+| `declared` só com linha correspondente em "Declared contract changes" que enumere todas as chaves/status divergentes | leitura |
+| `Result: CLEAN` ⇒ fingerprint inalterado entre o primeiro boot e o fim (validação de tentativa única) | leitura |
 | `Result: FAILED` ⇒ seção Diagnosis preenchida | leitura |

@@ -17,7 +17,7 @@ Regras comuns (constituição, Princípio V):
 | `count-source-files.sh` | `<project-dir> [ext ...]` | `FILES=<n>`, `LOC=<n>`, depois um caminho por linha | leitura |
 | `check-restore-point.sh` | `<project-dir>` | `GIT=yes\|no`, `STATUS=ok\|dirty\|no-git`, `HEAD=<sha>`, `PENDING=<n>` + arquivos | leitura |
 | `resolve-output-path.sh` | `<audit\|validation> <project-name> [N]` | `ROOT=<dir>`, `N=<n>`, `PATH_OUT=<arquivo>` | leitura |
-| `workspace-artifacts.sh` | `snapshot <project-dir> <state-file>` \| `diff <project-dir> <state-file>` | `diff`: um caminho novo por linha (exclui `.claude/` e o ambiente isolado) | leitura (state-file em diretório temporário) |
+| `workspace-artifacts.sh` | `snapshot <project-dir> <state-file>` \| `diff <project-dir> <state-file>` \| `fingerprint <project-dir>` | `diff`: um caminho novo por linha (exclui `.claude/` e o ambiente isolado); `fingerprint`: `FINGERPRINT=<hash>` do conteúdo dos arquivos não ignorados fora de `.claude/` | leitura (state-file em diretório temporário) |
 | `check-port.sh` | `<host> <port>` | `PORT_FREE=yes` (exit 0) ou `PORT_FREE=no` (exit 1) + `LISTENER_PIDS=<pids>` quando `lsof` existe — usa `curl` (conexão recusada = livre) | leitura |
 | `wait-for-http.sh` | `<url> [timeout-seconds] [pid]` | `READY=yes` (exit 0); `READY=no` (exit 1) por timeout ou se o `pid` informado morrer antes de responder | leitura |
 | `probe-endpoints.sh` | `<base-url> <requests-file> <out-file>` | `out-file`: por requisição, bloco `### <#> <METHOD> <PATH>`, `STATUS=<code>`, `CONTENT_TYPE=<tipo>`, corpo bruto; stdout `PROBED=<n>`, `OUT=<arquivo>` | requisições HTTP locais |

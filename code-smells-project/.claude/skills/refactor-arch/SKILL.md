@@ -31,8 +31,10 @@ relatório).
 4. A Fase 3 nunca altera `.claude/` (inclusive esta skill) nem `reports/`. Fora do projeto, a
    única escrita é a evidência em `evidence/`; arquivos efêmeros só no diretório temporário do
    sistema (`mktemp -d`), removido ao final.
-5. **Falha não é remendada.** A partir do primeiro boot da aplicação refatorada, nenhum arquivo do
-   projeto é alterado. Se uma verificação falhar, declare FALHA, diagnostique e ofereça reversão.
+5. **Falha não é remendada.** A validação tem uma única tentativa: a partir do primeiro boot da
+   aplicação refatorada, nenhum arquivo do projeto é alterado e a validação não é reiniciada. Se
+   uma verificação falhar — ou se você notar algo a corrigir —, declare FALHA, diagnostique e
+   ofereça reversão. Corrigir e "validar de novo" invalida a execução.
 6. Nunca declare sucesso sem evidência da validação.
 
 ## Idioma e formato
@@ -51,7 +53,8 @@ Copie e mantenha atualizado durante a execução:
 - [ ] Phase 3: restore point ok, work dir created, isolated environment ready
 - [ ] Phase 3: behavior baseline captured (runtime artifacts removed)
 - [ ] Phase 3: refactoring applied for every finding (MVC structure)
-- [ ] Phase 3: validation — boot, endpoints, re-audit
+- [ ] Phase 3: self-review done (pre-re-audit, contract by code, syntax) — last chance to edit
+- [ ] Phase 3: single-attempt validation — fingerprint, boot, endpoints, re-audit, fingerprint
 - [ ] Phase 3: evidence saved, final banner printed, work dir removed
 ```
 
@@ -80,7 +83,7 @@ com `2`/`3` ou não puder ser executado, use o procedimento manual equivalente.
 | `count-source-files.sh` | `<project-dir> [ext ...]` → `FILES`, `LOC`, caminhos | 1, 3 | Listar com `find` os arquivos com extensão da linguagem predominante, excluindo `.claude/ .git/ node_modules/ .venv/ venv/ __pycache__/ vendor/ dist/ build/`; somar linhas com `wc -l` |
 | `check-restore-point.sh` | `<project-dir>` → `GIT`, `STATUS`, `HEAD`, `PENDING` | 1, 3 | No projeto: `git rev-parse --is-inside-work-tree`, `git rev-parse --short HEAD` e `git status --porcelain --untracked-files=all -- . ':(exclude).claude'` (vazio = `ok`) |
 | `resolve-output-path.sh` | `<audit\|validation> <project-name> [N]` → `ROOT`, `N`, `PATH_OUT` | 2, 3 | Raiz = `git rev-parse --show-toplevel`; `N` = argumento → arquivo existente cuja linha `Project:` (ou título da evidência) é o projeto → maior `N` existente + 1 |
-| `workspace-artifacts.sh` | `snapshot\|diff <project-dir> <state-file>` → caminhos novos | 3 | Antes: `find <projeto> -print` (sem `.claude .git .venv venv node_modules`) para um arquivo em `WORK`; depois: repetir e comparar com `comm -13` |
+| `workspace-artifacts.sh` | `snapshot\|diff <project-dir> <state-file>` → caminhos novos; `fingerprint <project-dir>` → `FINGERPRINT` | 3 | Antes: `find <projeto> -print` (sem `.claude .git .venv venv node_modules`) para um arquivo em `WORK`; depois: repetir e comparar com `comm -13`. Fingerprint: `git ls-files --cached --others --exclude-standard -- . ':(exclude).claude'` e `cksum` de cada arquivo, somados com `cksum` |
 | `check-port.sh` | `<host> <port>` → `PORT_FREE`, `LISTENER_PIDS` | 3 | `curl -s -o /dev/null --max-time 2 http://<host>:<port>/` com exit 7 = livre; `lsof -t -iTCP:<port> -sTCP:LISTEN` lista os processos |
 | `wait-for-http.sh` | `<url> [timeout] [pid]` → `READY` | 3 | Repetir `curl -s -o /dev/null -w '%{http_code}' <url>` a cada 1 s até código ≠ `000`, conferindo `kill -0 <pid>` |
 | `probe-endpoints.sh` | `<base-url> <requests-file> <out-file>` | 3 | Para cada linha do plano, `curl -s -X <método> [-H 'Content-Type: application/json' --data-binary @<corpo>] -w '%{http_code}' <url>` e anotar status, tipo e corpo |
@@ -170,11 +173,14 @@ funcionando e gravar a evidência.
    - Registre cada mudança de contrato inevitável (correção de segurança) para declarar.
    - Mantenha comandos de boot/setup funcionando; não adicione dependências de terceiros; não
      toque `.claude/` nem `reports/`; não crie `.env`.
-   - Antes de validar: revise o código refatorado contra o catálogo e o checklist das
-     guidelines §7 e faça a verificação sintática sem executar a aplicação (protocolo §7.1).
-4. **Validação** — protocolo §7–§8, com o mesmo plano e o mesmo estado inicial: (a) boot,
-   (b) endpoints vs. linha de base, (c) reauditoria com zero findings. Da primeira inicialização
-   em diante, **nenhuma alteração** no projeto.
+   - **Autorrevisão obrigatória antes de validar** (protocolo §7.1): pré-reauditoria completa
+     com o catálogo, conferência do contrato de cada endpoint por leitura do código, checklist
+     das guidelines §7 e verificação sintática sem executar a aplicação. Corrija tudo aqui — é a
+     última oportunidade de alterar o código.
+4. **Validação** — protocolo §7.2–§8, tentativa única, com o mesmo plano e o mesmo estado
+   inicial: fingerprint inicial, (a) boot, (b) endpoints vs. linha de base, (c) reauditoria com
+   zero findings, (d) fingerprint final igual ao inicial. Da primeira inicialização em diante,
+   **nenhuma alteração** no projeto e nenhum segundo boot.
 5. **Evidência** — protocolo §9: `resolve-output-path.sh validation <nome-do-diretório> <N>` e
    gravação do arquivo.
 6. **Resultado**

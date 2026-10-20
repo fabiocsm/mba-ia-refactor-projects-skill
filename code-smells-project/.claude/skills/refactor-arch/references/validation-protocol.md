@@ -12,7 +12,7 @@ aplicação, comparação de endpoints, reauditoria, evidência e fluxo de falha
 - [4. Procedimento de execução da aplicação](#4-procedimento-de-execução-da-aplicação)
 - [5. Linha de base de comportamento](#5-linha-de-base-de-comportamento)
 - [6. Formato de resposta e comparação](#6-formato-de-resposta-e-comparação)
-- [7. Validação pós-refatoração](#7-validação-pós-refatoração)
+- [7. Validação pós-refatoração](#7-validação-pós-refatoração) — 7.1 autorrevisão, 7.2 validação de tentativa única
 - [8. Reauditoria](#8-reauditoria)
 - [9. Evidência](#9-evidência)
 - [10. Fluxo de falha](#10-fluxo-de-falha)
@@ -131,23 +131,44 @@ Resultado por endpoint (todas as requisições do endpoint):
 
 ## 7. Validação pós-refatoração
 
-1. **Antes de iniciar a validação**, ainda dentro da etapa de refatoração, você PODE: revisar o
-   código contra o catálogo e as guidelines e fazer verificação sintática que não executa a
-   aplicação (ex.: `python -m py_compile` com `PYTHONDONTWRITEBYTECODE=1`, `node --check
-   <arquivo>`). Corrigir o próprio código nessa etapa é permitido.
-2. **A validação começa no primeiro boot da aplicação refatorada.** A partir daí é proibido
-   alterar arquivos do projeto: qualquer verificação que falhe é **FAILED**.
+### 7.1 Autorrevisão obrigatória (antes da validação — correções permitidas)
+
+Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorada pela primeira vez:
+
+1. **Pré-reauditoria completa:** rode `count-source-files.sh`, leia **todos** os arquivos-fonte e
+   aplique o catálogo inteiro (os 20 anti-patterns, com os falsos positivos), exatamente como na
+   reauditoria oficial (§8). Duplicações entre funções novas (validadores, mapeadores) contam.
+2. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
+   status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
+   ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
+   exatamente o shape original.
+3. **Verificação sintática sem executar a aplicação e sem gravar caches:** Python
+   `.venv/bin/python -c "import sys; [compile(open(p, encoding='utf-8').read(), p, 'exec') for p in sys.argv[1:]]" <arquivos>`
+   (não use `py_compile`, que grava `.pyc`); Node `node --check <arquivo>`.
+4. Corrija tudo o que encontrar e repita 1–3 até não restar nada. Só então siga para §7.2.
+
+### 7.2 Validação (uma única tentativa — nenhuma correção)
+
+1. **Fingerprint inicial:** `workspace-artifacts.sh fingerprint <projeto>` → guarde como
+   `FP_START`. A validação começa aqui.
+2. **Regra de tentativa única:** daqui em diante é proibido alterar qualquer arquivo do projeto e
+   proibido reiniciar a validação. Não existe "refazer a validação depois de corrigir": se
+   qualquer verificação falhar — ou se você perceber algo que precisaria corrigir —, o resultado
+   é **FAILED** (§10). A aplicação refatorada é iniciada **uma única vez**.
 3. Endpoints protegidos por TP-14: gere um token aleatório para a execução (ex.:
-   `openssl rand -hex 16` ou `od -An -tx1 -N16 /dev/urandom | tr -d ' \n'`), passe-o no boot
-   (`ADMIN_TOKEN=<token>`) e crie `WORK/headers-admin.txt` com `X-Admin-Token: <token>` (ou o
-   cabeçalho definido no código); esses endpoints usam a 4ª coluna do plano. Os demais campos do
-   plano são idênticos aos da linha de base.
+   `openssl rand -hex 16`), passe-o no boot (`ADMIN_TOKEN=<token>`) e crie
+   `WORK/headers-admin.txt` com `X-Admin-Token: <token>` (ou o cabeçalho definido no código);
+   esses endpoints usam a 4ª coluna do plano. Os demais campos do plano são idênticos aos da linha
+   de base.
 4. Execute o procedimento §4 com a aplicação refatorada (mesmo setup, mesmo estado inicial).
 5. Verificações, todas obrigatórias:
    - **(a) Boot:** `READY=yes`, processo vivo e sem traceback/erro no `LOG` até o fim do probe.
    - **(b) Endpoints:** compare cada endpoint com a linha de base (§6). Todo endpoint `✓` ou
      `declared`; nenhum `✗`.
    - **(c) Reauditoria:** §8 com zero findings.
+   - **(d) Integridade:** `workspace-artifacts.sh fingerprint <projeto>` ao final é igual a
+     `FP_START` (prova de que nada foi alterado durante a validação). Diferente = FAILED
+     (`skill`).
 
 ## 8. Reauditoria
 
@@ -180,6 +201,7 @@ grave o arquivo (sucesso **e** falha; reexecução sobrescreve). Formato exato:
 - Boot command: `<comando>`
 - Port: <porta> (free before boot: yes)
 - Runtime artifacts removed: <lista ou "none">
+- Code fingerprint: <FP_START> at first boot / <FP_END> at end (unchanged: yes \| no)
 
 ## Boot
 ```text
@@ -210,7 +232,9 @@ Remaining anti-patterns: 0 \| <lista>
 
 Regras: uma linha por endpoint do inventário (contagem = `Endpoints` da Fase 1); requisições
 múltiplas do mesmo endpoint aparecem na mesma linha (`200, 400`); `declared` exige linha
-correspondente em "Declared contract changes" (sem mudanças: uma linha `none`); em `CLEAN`, omita
+correspondente em "Declared contract changes" que enumere **todas** as chaves/status que diferem
+da linha de base (uma chave removida e não listada torna o endpoint `✗`); sem mudanças, uma linha
+`none`; em `CLEAN`, omita
 a seção Diagnosis; em falha antes da validação (ex.: boot da linha de base sem porta livre),
 preencha o que foi executado e marque o resto como `not executed`.
 
