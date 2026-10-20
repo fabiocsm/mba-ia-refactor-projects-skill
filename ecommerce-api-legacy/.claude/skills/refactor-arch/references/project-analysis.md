@@ -39,8 +39,11 @@ A Fase 1 é **somente leitura**: não execute a aplicação, não instale nada e
 | `Cargo.toml` | Rust |
 
 - Em empate, vale a linguagem com mais arquivos-fonte (é o que `count-source-files.sh` usa).
-- Versão da linguagem: só se declarada (`python_requires`, `.python-version`, `engines.node`,
-  `go 1.xx`). Caso contrário, informe só a linguagem.
+- Versão da linguagem: a declarada (`python_requires`, `.python-version`, `engines.node`,
+  `go 1.xx`). Se não houver, registre a versão do runtime disponível com um comando somente
+  leitura (`.venv/bin/python --version` se o ambiente isolado existir, senão `python3 --version`;
+  `node --version`) e informe `Python 3.x (runtime; não declarada)`. Essa é a versão de referência
+  para APIs deprecated (AP-15).
 
 ## 3. Framework e versão
 

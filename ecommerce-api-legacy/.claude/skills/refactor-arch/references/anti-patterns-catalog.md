@@ -52,7 +52,9 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
 5. Verifique cada linha citada relendo o arquivo (ou com um comando pontual como
    `sed -n '<linha>p' <arquivo>`): a linha precisa mostrar o problema descrito.
 6. API deprecated (AP-15) só é finding se a API constar da tabela do AP-15 ou tiver aviso de
-   depreciação documentado pelo fornecedor para a versão declarada no manifesto.
+   depreciação documentado pelo fornecedor. A versão de referência é a declarada no manifesto;
+   se não houver versão declarada, vale a versão do runtime registrada na Fase 1 (ex.: a do
+   interpretador do ambiente isolado).
 7. Na **reauditoria** (Fase 3) aplique exatamente os mesmos sinais e falsos positivos ao código
    refatorado. Qualquer sinal remanescente, de qualquer severidade, é finding.
 
@@ -370,7 +372,8 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
 
 - **Severidade:** MEDIUM · **Categoria:** deprecated · **Transformações:** TP-10
 - **Sinais de detecção:** uso de API da tabela abaixo (ou com aviso de depreciação documentado
-  pelo fornecedor para a versão declarada no manifesto). O finding DEVE indicar o equivalente
+  pelo fornecedor) na versão de referência — a declarada no manifesto ou, sem declaração, a do
+  runtime registrada na Fase 1. O finding DEVE indicar o equivalente
   moderno na `Recommendation`.
 
   | Stack | API obsoleta | Equivalente moderno |

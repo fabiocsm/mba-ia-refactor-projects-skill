@@ -148,7 +148,9 @@ de `py_compile`, linters, compiladores ou ferramentas que gravem caches; só lei
 `git show` e buscas. Ele reporta **apenas** (a) findings do catálogo, cada um com `AP-NN`, o sinal
 de detecção que casa e `arquivo:linha`, já descontados os falsos positivos; e (b) divergências de
 contrato dentro do escopo do passo 3. Sugestões de estilo ou melhorias fora do catálogo não são
-reportadas. **Limite de 3 rodadas:** se a 3ª rodada ainda trouxer itens, corrija-os e siga para a
+reportadas. Sinais que costumam escapar e devem ser verificados um a um: consulta ORM/SQL fora de
+`models/` (`Model.query`, `db.session.query`, `execute`) — AP-06; APIs da tabela do AP-15 na
+versão de referência; literais de domínio em condições e filtros (`status == "done"`) — AP-17. **Limite de 3 rodadas:** se a 3ª rodada ainda trouxer itens, corrija-os e siga para a
 validação (§7.2) — a reauditoria oficial decide o resultado: devolve a lista de findings e de divergências
 de contrato com `arquivo:linha`. Você corrige e chama um **novo** subagente até a resposta vir
 vazia. Se a ferramenta de agentes não estiver disponível, faça os passos você mesmo, com o mesmo
