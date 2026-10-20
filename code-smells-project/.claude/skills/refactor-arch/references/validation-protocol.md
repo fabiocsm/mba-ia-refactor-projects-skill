@@ -159,8 +159,10 @@ rigor, e registre isso na evidência (`Reviewer: self`).
    oficial. Duplicações entre funções novas (validadores, mapeadores) contam.
 2. **Matriz de validação:** para cada endpoint que recebe corpo, query ou path params, escreva
    em `WORK/validation-matrix.md` cada campo usado → primeiro uso → regra de tipo → regra de
-   formato/faixa existente no original. Todo campo cujo uso pode falhar (comparação, aritmética,
-   `len()`, conversão, indexação, inclusive em elementos de listas) precisa de regra de tipo;
+   formato/faixa existente no original. **Todo campo lido** (inclusive em elementos de listas)
+   precisa de regra de tipo antes de qualquer operação — comparação, aritmética, `len()`,
+   conversão, indexação, chamada de função ou de biblioteca (hash, parse, regex); a única exceção
+   é o valor apenas persistido/devolvido sem operação;
    regras de formato/faixa que o original tinha precisam ser mantidas. Campo sem a regra exigida
    é AP-12: corrija o validador. Não acrescente rejeições que o original não fazia (contrato).
 3. **Conferência de contrato por leitura de código**, incluindo as respostas **explícitas** do

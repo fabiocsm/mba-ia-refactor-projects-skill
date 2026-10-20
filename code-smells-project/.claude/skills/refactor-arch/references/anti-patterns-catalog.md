@@ -315,12 +315,13 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
   - Valor do request usado em comparação numérica, aritmética ou persistência sem verificar tipo
     e faixa (`if priority < 1` com `priority` vindo do JSON).
   - Conversão de query/path param (`int()`, `float()`, `Number()`) sem tratar valor inválido.
-  - Campo cujo uso pode gerar erro de execução — comparação, aritmética, `len()`, conversão,
-    chamada de método, indexação — sem verificação de tipo antes (gera 500 com entrada inválida).
+  - Campo do request repassado a **qualquer** operação — comparação, aritmética, `len()`,
+    conversão, indexação, chamada de método ou de função (inclusive de biblioteca: hash de senha,
+    parse de data, regex) — sem verificação de tipo antes (gera 500 com entrada inválida).
 - **Falsos positivos:**
   - Validação centralizada (validador/schema) chamada na borda antes do controller.
   - Tipos já garantidos pelo framework (`<int:id>` no Flask, conversores de rota).
-  - Campo apenas repassado à persistência sem uso que possa falhar, ou ausência de regra de
+  - Campo apenas persistido ou devolvido sem nenhuma operação, ou ausência de regra de
     formato que o original também não tinha: passar a rejeitar entradas que o original aceitava
     mudaria o contrato (`mvc-guidelines.md` §5). Mantenha a regra de formato que já existia.
   - Diferenças de regras entre endpoints que já existiam no original (ex.: criação valida um
