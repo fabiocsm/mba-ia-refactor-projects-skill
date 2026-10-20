@@ -293,6 +293,8 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
   - Acesso a relacionamento ORM carregado sob demanda dentro de laço (`book.author.name`,
     `len(member.loans)`) sem eager loading configurado na consulta.
   - `Model.query.get(id)`/`count()` por item dentro de laço.
+  - Chamada a função de model/repositório que executa consulta, feita dentro de laço sobre uma
+    coleção (a consulta está em outro arquivo, mas o N+1 é do laço que a chama).
 - **Falsos positivos:**
   - Laço sobre coleção constante e pequena definida no código (ex.: lista fixa de status) — ainda
     assim prefira `GROUP BY`.
@@ -304,6 +306,8 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
 
 - **Severidade:** MEDIUM · **Categoria:** padronização · **Transformações:** TP-08
 - **Sinais de detecção:**
+  - Elementos de listas recebidas no corpo (itens, linhas) usados sem validar cada elemento
+    (tipo do elemento e de cada campo usado).
   - Corpo JSON usado sem verificar que existe e é objeto (`data.get(...)` com `data` possivelmente
     `None`; `req.body.x` sem checagem).
   - Valor do request usado em comparação numérica, aritmética ou persistência sem verificar tipo

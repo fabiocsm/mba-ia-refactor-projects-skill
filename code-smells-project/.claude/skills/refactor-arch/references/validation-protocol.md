@@ -138,7 +138,7 @@ Resultado por endpoint (todas as requisições do endpoint):
 
 Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorada pela primeira vez:
 
-1. **Pré-reauditoria completa:** execute os passos 1–3 de §8 (leitura arquivo por arquivo com a
+1. **Pré-reauditoria completa:** execute os passos 1–5 de §8 (leitura arquivo por arquivo com a
    ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria
    oficial. Duplicações entre funções novas (validadores, mapeadores) contam.
 2. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
@@ -182,12 +182,19 @@ depois do probe e antes do fingerprint final. Não reaproveite o resultado da au
 2. Abra **cada** arquivo da lista com a ferramenta de leitura de arquivos (não substitua por
    `grep`: buscas ajudam a confirmar, mas não substituem a leitura) e aplique o catálogo completo
    (`anti-patterns-catalog.md`) com os mesmos sinais e falsos positivos da Fase 2.
-3. Registre em `WORK/reaudit.md` uma linha por arquivo: `<arquivo> — lido — <findings ou none>`.
+3. **Rastreabilidade dos findings originais:** para cada localização de cada finding do
+   relatório da Fase 2, identifique para onde aquele código foi e confirme que o sinal
+   desapareceu (não basta ter criado a camada: o trecho específico precisa estar corrigido).
+4. **Rastreamento de dados do request:** em cada handler/controller/validador, siga cada campo do
+   request (inclusive campos de elementos de listas) até o primeiro uso em comparação,
+   aritmética, `len()`, consulta ou persistência e confirme a verificação de tipo antes; em cada
+   laço, confirme que nenhuma chamada dentro dele executa consulta (direta ou via model).
+5. Registre em `WORK/reaudit.md` uma linha por arquivo: `<arquivo> — lido — <findings ou none>`.
    O número de linhas deve ser igual a `FILES`. Atenção especial a sinais que costumam sobrar
    em código novo: comparações/aritmética com campos do request sem verificação de tipo
    (AP-12), blocos repetidos entre funções novas (AP-14), literais de regra fora das constantes
    (AP-17).
-4. Resultado: `Remaining anti-patterns: 0` ou a lista `[SEV] <nome> (AP-NN) — <arquivo:linha>`.
+6. Resultado: `Remaining anti-patterns: 0` ou a lista `[SEV] <nome> (AP-NN) — <arquivo:linha>`.
    Qualquer item = FAILED.
 
 ## 9. Evidência
