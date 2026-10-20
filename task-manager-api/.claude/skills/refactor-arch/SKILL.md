@@ -177,7 +177,8 @@ não crie, altere nem remova nenhum arquivo do projeto.
 2. **Linha de base de comportamento** — §3–§5 do protocolo com a aplicação **original**, tal como
    está no ponto de restauração: plano de requisições, verificação de porta, setup, boot, probe,
    parada e remoção dos artefatos de runtime. Ao terminar, imprima
-   `Behavior baseline captured: <k>/<k> endpoints (Source: captured|inferred)`.
+   `Behavior baseline captured: <k>/<k> endpoints (Source: captured|inferred)` e **continue
+   imediatamente** para o passo 3 na mesma resposta — essa linha é um marco, não uma pausa.
    Se você perceber que alterou algum arquivo do projeto antes desta linha, a execução já falhou:
    vá para o fluxo de falha (protocolo §10) com `Failure type: skill`.
 3. **Refatoração** — só agora leia `references/mvc-guidelines.md` e
