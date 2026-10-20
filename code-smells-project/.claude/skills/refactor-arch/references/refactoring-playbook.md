@@ -515,7 +515,9 @@ const report = [...byBook.values()];
 - **Resolve:** AP-12 · **Camada destino:** view/route (validators) · **Risco de contrato:** baixo
   para entradas válidas; mantenha status e mensagens das validações que já existiam
 - **Passos:** criar validadores por recurso que verificam corpo presente e objeto, campos
-  obrigatórios, tipos, faixas e formatos; reproduzir na mesma ordem as validações e mensagens
+  obrigatórios, tipos, faixas e formatos — **todo** campo do request usado em comparação,
+  aritmética, `len()` ou persistência tem o tipo verificado antes do uso (número: `int`/`float`
+  excluindo `bool`; texto: `str`); formatos de domínio (e-mail, cartão, data) com regra explícita; reproduzir na mesma ordem as validações e mensagens
   originais; lançar `ValidationError` (400) para o resto; chamar o validador na rota antes do
   controller.
 

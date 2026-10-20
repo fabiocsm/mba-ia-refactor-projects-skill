@@ -138,9 +138,9 @@ Resultado por endpoint (todas as requisições do endpoint):
 
 Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorada pela primeira vez:
 
-1. **Pré-reauditoria completa:** rode `count-source-files.sh`, leia **todos** os arquivos-fonte e
-   aplique o catálogo inteiro (os 20 anti-patterns, com os falsos positivos), exatamente como na
-   reauditoria oficial (§8). Duplicações entre funções novas (validadores, mapeadores) contam.
+1. **Pré-reauditoria completa:** execute os passos 1–3 de §8 (leitura arquivo por arquivo com a
+   ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria
+   oficial. Duplicações entre funções novas (validadores, mapeadores) contam.
 2. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
    status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
    ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
@@ -179,9 +179,15 @@ A reauditoria oficial é a verificação (c) da validação: uma **nova leitura 
 depois do probe e antes do fingerprint final. Não reaproveite o resultado da autorrevisão (§7.1).
 
 1. Rode `count-source-files.sh <projeto>` para a nova lista de arquivos-fonte.
-2. Leia **todos** os arquivos e aplique o catálogo completo (`anti-patterns-catalog.md`) com os
-   mesmos sinais e falsos positivos da Fase 2.
-3. Resultado: `Remaining anti-patterns: 0` ou a lista `[SEV] <nome> (AP-NN) — <arquivo:linha>`.
+2. Abra **cada** arquivo da lista com a ferramenta de leitura de arquivos (não substitua por
+   `grep`: buscas ajudam a confirmar, mas não substituem a leitura) e aplique o catálogo completo
+   (`anti-patterns-catalog.md`) com os mesmos sinais e falsos positivos da Fase 2.
+3. Registre em `WORK/reaudit.md` uma linha por arquivo: `<arquivo> — lido — <findings ou none>`.
+   O número de linhas deve ser igual a `FILES`. Atenção especial a sinais que costumam sobrar
+   em código novo: comparações/aritmética com campos do request sem verificação de tipo
+   (AP-12), blocos repetidos entre funções novas (AP-14), literais de regra fora das constantes
+   (AP-17).
+4. Resultado: `Remaining anti-patterns: 0` ou a lista `[SEV] <nome> (AP-NN) — <arquivo:linha>`.
    Qualquer item = FAILED.
 
 ## 9. Evidência

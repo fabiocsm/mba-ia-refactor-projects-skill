@@ -40,6 +40,10 @@ relatório).
    `reset`, `restore`, `add`, `commit`, `clean` no projeto. Única exceção: `revert-project.sh`
    após falha e confirmação do usuário.
 
+8. **Sem pausas na Fase 3:** depois do `y`, execute a Fase 3 inteira em sequência, sem parar
+   para pedir confirmação ou "continuar". As únicas perguntas da skill são a do gate da Fase 2 e
+   a de reversão após falha.
+
 ## Idioma e formato
 
 Banners, rótulos e perguntas em inglês exatamente como neste arquivo; descrições, impactos,
