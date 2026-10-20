@@ -141,14 +141,18 @@ Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorad
 1. **Pré-reauditoria completa:** execute os passos 1–5 de §8 (leitura arquivo por arquivo com a
    ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria
    oficial. Duplicações entre funções novas (validadores, mapeadores) contam.
-2. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
+2. **Matriz de validação:** para cada endpoint que recebe corpo, query ou path params, escreva
+   em `WORK/validation-matrix.md` cada campo usado → regra de tipo → regra de formato/faixa
+   (e-mail, cartão, datas, ids, quantidades e valores monetários sempre têm regra de formato ou
+   faixa explícita). Campo sem regra é AP-12: corrija o validador.
+3. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
    status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
    ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
    exatamente o shape original.
-3. **Verificação sintática sem executar a aplicação e sem gravar caches:** Python
+4. **Verificação sintática sem executar a aplicação e sem gravar caches:** Python
    `.venv/bin/python -c "import sys; [compile(open(p, encoding='utf-8').read(), p, 'exec') for p in sys.argv[1:]]" <arquivos>`
    (não use `py_compile`, que grava `.pyc`); Node `node --check <arquivo>`.
-4. Corrija tudo o que encontrar e repita 1–3 até não restar nada. Só então siga para §7.2.
+5. Corrija tudo o que encontrar e repita 1–4 até não restar nada. Só então siga para §7.2.
 
 ### 7.2 Validação (uma única tentativa — nenhuma correção)
 
@@ -177,6 +181,8 @@ Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorad
 
 A reauditoria oficial é a verificação (c) da validação: uma **nova leitura completa**, feita
 depois do probe e antes do fingerprint final. Não reaproveite o resultado da autorrevisão (§7.1).
+Nela você é **auditor somente leitura**: registre findings, nunca os corrija — qualquer finding
+leva ao fluxo de falha (§10).
 
 1. Rode `count-source-files.sh <projeto>` para a nova lista de arquivos-fonte.
 2. Abra **cada** arquivo da lista com a ferramenta de leitura de arquivos (não substitua por
