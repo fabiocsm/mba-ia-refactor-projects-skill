@@ -136,7 +136,17 @@ Resultado por endpoint (todas as requisições do endpoint):
 
 ### 7.1 Autorrevisão obrigatória (antes da validação — correções permitidas)
 
-Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorada pela primeira vez:
+Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorada pela primeira vez.
+
+**Revisor independente.** Quem escreveu o código tende a não ver os próprios deslizes. Por isso
+os passos 1–3 abaixo são executados por um **subagente com contexto limpo** (ferramenta de
+agentes do Claude Code), que recebe apenas: o caminho do projeto, o caminho de
+`references/anti-patterns-catalog.md`, o caminho do relatório da Fase 2, a lista de endpoints da
+linha de base com seus shapes e a instrução de ler o código original com `git show HEAD:<arquivo>`
+(somente leitura). O subagente não altera arquivos: devolve a lista de findings e de divergências
+de contrato com `arquivo:linha`. Você corrige e chama um **novo** subagente até a resposta vir
+vazia. Se a ferramenta de agentes não estiver disponível, faça os passos você mesmo, com o mesmo
+rigor, e registre isso na evidência (`Reviewer: self`).
 
 1. **Pré-reauditoria completa:** execute os passos 1–5 de §8 (leitura arquivo por arquivo com a
    ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria
@@ -147,7 +157,9 @@ Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorad
    `len()`, conversão, indexação, inclusive em elementos de listas) precisa de regra de tipo;
    regras de formato/faixa que o original tinha precisam ser mantidas. Campo sem a regra exigida
    é AP-12: corrija o validador. Não acrescente rejeições que o original não fazia (contrato).
-3. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
+3. **Conferência de contrato por leitura de código** (inclusive caminhos de erro que a linha de
+   base não exercita — para cada `return`/erro do handler original, o refatorado devolve o mesmo
+   status e as mesmas chaves no mesmo cenário): para cada endpoint do inventário, compare
    status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
    ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
    exatamente o shape original.
@@ -182,9 +194,10 @@ Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorad
 ## 8. Reauditoria
 
 A reauditoria oficial é a verificação (c) da validação: uma **nova leitura completa**, feita
-depois do probe e antes do fingerprint final. Não reaproveite o resultado da autorrevisão (§7.1).
-Nela você é **auditor somente leitura**: registre findings, nunca os corrija — qualquer finding
-leva ao fluxo de falha (§10).
+depois do probe e antes do fingerprint final, por um **novo subagente com contexto limpo** (como
+em §7.1; sem a ferramenta de agentes, por você mesmo, registrando `Reviewer: self`). Não reaproveite
+o resultado da autorrevisão. O revisor é **somente leitura**: registra findings, nunca os corrige
+— qualquer finding leva ao fluxo de falha (§10).
 
 1. Rode `count-source-files.sh <projeto>` para a nova lista de arquivos-fonte.
 2. Abra **cada** arquivo da lista com a ferramenta de leitura de arquivos (não substitua por
@@ -248,6 +261,7 @@ Source: captured \| inferred (<motivo>)
 | <METHOD path> | <mudança> | AP-NN |
 
 ## Re-audit
+Reviewer: subagent \| self
 Remaining anti-patterns: 0 \| <lista>
 
 ## Diagnosis (FAILED only)

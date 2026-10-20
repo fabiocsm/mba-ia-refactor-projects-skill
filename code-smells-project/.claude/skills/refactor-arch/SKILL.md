@@ -188,13 +188,14 @@ não crie, altere nem remova nenhum arquivo do projeto.
    - Registre cada mudança de contrato inevitável (correção de segurança) para declarar.
    - Mantenha comandos de boot/setup funcionando; não adicione dependências de terceiros; não
      toque `.claude/` nem `reports/`; não crie `.env`.
-   - **Autorrevisão obrigatória antes de validar** (protocolo §7.1): pré-reauditoria completa
-     com o catálogo, conferência do contrato de cada endpoint por leitura do código, checklist
-     das guidelines §7 e verificação sintática sem executar a aplicação. Corrija tudo aqui — é a
-     última oportunidade de alterar o código.
+   - **Autorrevisão obrigatória antes de validar** (protocolo §7.1), feita por um subagente
+     revisor independente com contexto limpo: pré-reauditoria completa com o catálogo, matriz de
+     validação, conferência do contrato de cada endpoint (inclusive caminhos de erro) contra o
+     código original. Repita com um novo subagente até não restar nada; faça a verificação
+     sintática. Corrija tudo aqui — é a última oportunidade de alterar o código.
 4. **Validação** — protocolo §7.2–§8, tentativa única, com o mesmo plano e o mesmo estado
    inicial: fingerprint inicial, (a) boot, (b) endpoints vs. linha de base, (c) reauditoria com
-   zero findings, (d) fingerprint final igual ao inicial. Da primeira inicialização em diante,
+   zero findings por um novo subagente revisor, (d) fingerprint final igual ao inicial. Da primeira inicialização em diante,
    **nenhuma alteração** no projeto e nenhum segundo boot.
 5. **Evidência** — protocolo §9: `resolve-output-path.sh validation <nome-do-diretório> <N>` e
    gravação do arquivo.

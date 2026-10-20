@@ -42,6 +42,7 @@ Source: captured \| inferred (<motivo>)
 | … | … | AP-NN |
 
 ## Re-audit
+Reviewer: subagent \| self
 Remaining anti-patterns: 0 \| <lista de findings com localização>
 
 ## Diagnosis (FAILED only)
