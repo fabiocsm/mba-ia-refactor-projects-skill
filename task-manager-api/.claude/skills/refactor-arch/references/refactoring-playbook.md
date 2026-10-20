@@ -792,7 +792,9 @@ const approved = card.startsWith(APPROVED_CARD_PREFIX);
      `lastID`/`changes`).
   2. Reescrever o fluxo como sequência `await`; paralelismo real com `Promise.all`.
   3. Rotas `async` passam pelo `asyncHandler` (TP-06).
-  4. Inicialização do banco (schema/seed) é aguardada antes de `listen`.
+  4. Inicialização do banco (schema/seed) é aguardada antes de `listen`, e a função de
+     inicialização é chamada com tratamento de erro:
+     `start().catch((err) => { logger.error("Startup failed", { error: err.message }); process.exitCode = 1; });`
 
 Antes (Node):
 

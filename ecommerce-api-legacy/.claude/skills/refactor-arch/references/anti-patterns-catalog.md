@@ -337,7 +337,8 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
   - `except:` nu (captura até `KeyboardInterrupt`/`SystemExit`) ou erro silenciado
     (`except: pass`).
   - Em Node, `err` de callback ignorado ou não verificado; promessa sem `catch`; rota assíncrona
-    no Express 4 sem encaminhar a rejeição para `next(err)`.
+    no Express 4 sem encaminhar a rejeição para `next(err)`; função assíncrona de inicialização
+    chamada no nível do módulo/entry point sem tratamento de erro (`start();` sem `.catch`).
   - Ausência de tratador central (`@app.errorhandler`, middleware de erro do Express).
 - **Falsos positivos:**
   - Captura estreita de exceção esperada convertida em resposta de domínio (`ValueError` → 400,
