@@ -142,9 +142,11 @@ Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorad
    ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria
    oficial. Duplicações entre funções novas (validadores, mapeadores) contam.
 2. **Matriz de validação:** para cada endpoint que recebe corpo, query ou path params, escreva
-   em `WORK/validation-matrix.md` cada campo usado → regra de tipo → regra de formato/faixa
-   (e-mail, cartão, datas, ids, quantidades e valores monetários sempre têm regra de formato ou
-   faixa explícita). Campo sem regra é AP-12: corrija o validador.
+   em `WORK/validation-matrix.md` cada campo usado → primeiro uso → regra de tipo → regra de
+   formato/faixa existente no original. Todo campo cujo uso pode falhar (comparação, aritmética,
+   `len()`, conversão, indexação, inclusive em elementos de listas) precisa de regra de tipo;
+   regras de formato/faixa que o original tinha precisam ser mantidas. Campo sem a regra exigida
+   é AP-12: corrija o validador. Não acrescente rejeições que o original não fazia (contrato).
 3. **Conferência de contrato por leitura de código:** para cada endpoint do inventário, compare
    status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
    ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver

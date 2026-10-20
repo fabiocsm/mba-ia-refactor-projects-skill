@@ -516,8 +516,10 @@ const report = [...byBook.values()];
   para entradas válidas; mantenha status e mensagens das validações que já existiam
 - **Passos:** criar validadores por recurso que verificam corpo presente e objeto, campos
   obrigatórios, tipos, faixas e formatos — **todo** campo do request usado em comparação,
-  aritmética, `len()` ou persistência tem o tipo verificado antes do uso (número: `int`/`float`
-  excluindo `bool`; texto: `str`); formatos de domínio (e-mail, cartão, data) com regra explícita; reproduzir na mesma ordem as validações e mensagens
+  aritmética, `len()`, conversão ou indexação tem o tipo verificado antes do uso (número:
+  `int`/`float` excluindo `bool`; texto: `str`), inclusive campos de elementos de listas; regras
+  de formato que o original já tinha são mantidas e aplicadas de forma consistente em todos os
+  endpoints do mesmo campo, sem criar rejeições novas para entradas que o original aceitava; reproduzir na mesma ordem as validações e mensagens
   originais; lançar `ValidationError` (400) para o resto; chamar o validador na rota antes do
   controller.
 

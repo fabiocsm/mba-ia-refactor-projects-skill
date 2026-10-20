@@ -197,6 +197,8 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
 
 - **Severidade:** HIGH · **Categoria:** arquitetura · **Transformações:** TP-04
 - **Sinais de detecção:**
+  - Controller/service (camada de regras) que executa SQL ou ORM diretamente em vez de chamar um
+    model (`db.execute(...)`, `cursor.execute(...)`, `Model.query...` dentro do controller).
   - Handler de rota (função decorada com `@app.route`/`@bp.route`, registrada com
     `add_url_rule`, callback de `app.get/post/...` ou `router.<verbo>`) que, além de ler o
     request e devolver a resposta: executa consultas SQL/ORM diretamente; calcula valores de
@@ -313,12 +315,16 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
   - Valor do request usado em comparação numérica, aritmética ou persistência sem verificar tipo
     e faixa (`if priority < 1` com `priority` vindo do JSON).
   - Conversão de query/path param (`int()`, `float()`, `Number()`) sem tratar valor inválido.
-  - Campo atualizado com qualquer valor recebido (ex.: `entity.color = data["color"]`) sem regra
-    de formato quando o domínio tem formato definido.
-  - Apenas checagem de presença em fluxo que grava dados sensíveis (e-mail, cartão, valores).
+  - Campo cujo uso pode gerar erro de execução — comparação, aritmética, `len()`, conversão,
+    chamada de método, indexação — sem verificação de tipo antes (gera 500 com entrada inválida).
+  - Regra de formato aplicada a um campo em um endpoint e ausente para o mesmo campo em outro
+    (ex.: e-mail validado no cadastro e não na atualização).
 - **Falsos positivos:**
   - Validação centralizada (validador/schema) chamada na borda antes do controller.
   - Tipos já garantidos pelo framework (`<int:id>` no Flask, conversores de rota).
+  - Campo apenas repassado à persistência sem uso que possa falhar, ou ausência de regra de
+    formato que o original também não tinha: passar a rejeitar entradas que o original aceitava
+    mudaria o contrato (`mvc-guidelines.md` §5). Mantenha a regra de formato que já existia.
 - **Impacto:** erros 500 com entradas inválidas, dados corrompidos, superfície de ataque maior.
 
 ### AP-13 Scattered or Generic Error Handling
