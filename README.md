@@ -518,3 +518,197 @@ finding correspondente no relatório gerado pela skill (`reports/audit-project-N
 | 12 | LOW | `print` no lugar de logger | `routes/task_routes.py:149`, `routes/user_routes.py:83`, `utils/helpers.py:39` | Logs sem nível nem destino configurável. | |
 | 13 | LOW | Magic numbers ignorando constantes existentes | `routes/task_routes.py:96-114`, `routes/user_routes.py:64` | Limites `3`, `200`, `1..5` e `4` repetidos enquanto `utils/helpers.py:110-116` define as constantes. | |
 | 14 | LOW | Nomes pobres | `routes/report_routes.py:24-28` | `p1`…`p5` escondem a semântica de prioridade. | |
+
+## Construção da Skill
+
+A skill está em `.claude/skills/refactor-arch/` dentro de cada projeto. A cópia canônica é a de
+`code-smells-project/`; as outras duas são cópias idênticas (`diff -r` vazio).
+
+```text
+.claude/skills/refactor-arch/
+├── SKILL.md                         # orquestração das 3 fases (206 linhas de corpo)
+├── references/
+│   ├── project-analysis.md          # área 1 — análise de projeto (Fase 1)
+│   ├── anti-patterns-catalog.md     # área 2 — 20 anti-patterns (Fases 2 e 3)
+│   ├── report-template.md           # área 3 — template do relatório (Fase 2)
+│   ├── mvc-guidelines.md            # área 4 — regras do MVC alvo (Fase 3)
+│   ├── refactoring-playbook.md      # área 5 — 18 transformações com antes/depois (Fase 3)
+│   └── validation-protocol.md       # linha de base de comportamento, validação, evidência, reversão
+└── scripts/                         # 8 scripts POSIX sh, testados nos 3 projetos
+```
+
+### Decisões de design
+
+- **`SKILL.md` como prompt de orquestração, conhecimento nas referências (progressive
+  disclosure).** O `SKILL.md` define regras não negociáveis, um checklist de progresso copiável,
+  os passos e critérios de saída de cada fase e **quando** ler cada referência. Cada fase carrega
+  só o que precisa: a Fase 1 lê a análise de projeto; a Fase 2, catálogo e template; a Fase 3,
+  guidelines, playbook e protocolo de validação. Arquivos com mais de 100 linhas começam com
+  sumário.
+- **Um arquivo por área de conhecimento**, cada um identificável pelo título — a cobertura das 5
+  áreas exigidas é verificável. O protocolo de validação ficou em arquivo próprio porque é longo
+  e frágil (instruções de baixa liberdade).
+- **Frontmatter:** `name: refactor-arch`; `description` em terceira pessoa, com o caso de uso
+  primeiro e os termos-gatilho (auditoria arquitetural, anti-patterns, code smells, severidade,
+  refatoração MVC, validação); `argument-hint: "[report-number]"` documenta o argumento opcional;
+  `disable-model-invocation: true` porque a skill reescreve código e só deve rodar quando o
+  usuário digita `/refactor-arch`. Não usamos `allowed-tools` (manteria o usuário fora do laço
+  de permissões) nem `context: fork` (a Fase 2 precisa pausar e conversar no mesmo contexto).
+- **Gate humano e segurança da Fase 3.** Fases 1–2 são somente leitura (a única escrita é o
+  relatório em `reports/`). A pergunta `Proceed with refactoring (Phase 3)? [y/n]` encerra a
+  resposta; sem ponto de restauração git limpo a skill imprime `Phase 3 is blocked: …` no lugar
+  da pergunta. A Fase 3 captura a **linha de base de comportamento** da aplicação original (status
+  e formato de cada endpoint), refatora, valida (boot + comparação + reauditoria com zero
+  anti-patterns) e grava a evidência. Falha não é remendada: a skill diagnostica e oferece
+  reverter o projeto ao `HEAD`.
+- **Relatório e evidência gravados pela própria skill**, com `N` resolvido de forma genérica
+  (argumento → relatório existente do mesmo projeto → próximo número livre).
+- **Scripts para o que precisa ser determinístico**, cada um com cabeçalho de uso, saída
+  `KEY=VALUE`, exit codes `0/1/2/3`, nenhum valor de projeto embutido e um procedimento manual
+  equivalente descrito no `SKILL.md`:
+
+  | Script | Para quê |
+  |---|---|
+  | `count-source-files.sh` | contar arquivos-fonte e linhas com exclusões padrão |
+  | `check-restore-point.sh` | git presente e sem alterações pendentes fora de `.claude/` |
+  | `resolve-output-path.sh` | caminho de `reports/audit-project-N.md` e `evidence/validation-project-N.md` |
+  | `workspace-artifacts.sh` | detectar artefatos de runtime (bancos, caches) criados por uma execução |
+  | `check-port.sh` | porta livre antes do boot (resposta de outro processo nunca conta) |
+  | `wait-for-http.sh` | aguardar o boot exigindo que o processo iniciado continue vivo |
+  | `probe-endpoints.sh` | executar o plano de requisições e gravar status, tipo e corpo |
+  | `revert-project.sh` | reverter o projeto ao ponto de restauração preservando `.claude/` e ignorados |
+
+### Anti-patterns do catálogo e por quê
+
+O catálogo tem 20 entradas (`AP-01`–`AP-20`) com as quatro severidades do enunciado. Cada uma tem
+sinais de detecção concretos com exemplos Python e Node, **falsos positivos** (essenciais para a
+reauditoria com zero findings ser objetiva), impacto e os padrões do playbook que a eliminam.
+
+| Severidade | Anti-patterns | Por quê |
+|---|---|---|
+| CRITICAL | AP-01 credenciais hardcoded · AP-02 SQL injection · AP-03 God class/file · AP-04 endpoint administrativo sem proteção · AP-05 senha em texto puro/hash fraco | exemplos literais da definição de CRITICAL do enunciado e problemas encontrados nos 3 projetos na Análise Manual (segredos nos 3, SQL concatenado e reset/SQL arbitrário no projeto 1, MD5 e base64 nos projetos 2 e 3) |
+| HIGH | AP-06 regra de negócio em rotas · AP-07 estado global mutável · AP-08 acoplamento sem DI · AP-09 exposição de dados sensíveis · AP-10 debug/defaults inseguros | violações de MVC/SOLID citadas na definição de HIGH e vazamentos (senha na resposta, cartão no log, debugger exposto) |
+| MEDIUM | AP-11 N+1 · AP-12 validação ausente · AP-13 tratamento de erros espalhado · AP-14 duplicação · AP-15 API deprecated · AP-16 callback hell | itens da definição de MEDIUM, a detecção de APIs deprecated exigida (com tabela obsoleto → moderno por stack) e o padrão assíncrono típico de Node legado |
+| LOW | AP-17 magic numbers/strings · AP-18 nomes pobres · AP-19 print/console no lugar de logger · AP-20 imports/código morto | definição de LOW e o que precisa ser eliminado para a reauditoria chegar a zero |
+
+O playbook tem 18 transformações (`TP-01`–`TP-18`), todas com antes/depois em Python/Flask e/ou
+Node/Express, aplicadas na ordem segurança → estrutura → qualidade. Todo `AP` aponta para ao
+menos um `TP`.
+
+### Como a skill é agnóstica de tecnologia
+
+- **Detecção por heurísticas**, não por nomes: manifestos (`requirements.txt`, `package.json`,
+  `go.mod`, …), imports, padrões de bootstrap e declaração de rotas por framework, drivers de
+  banco. Campo sem evidência vira `not detected`.
+- **Exemplos multi-stack em domínio neutro** (biblioteca: `books`, `members`, `loans`) — nenhum
+  nome de arquivo, rota, tabela ou domínio dos projetos-alvo nas regras. Verificado a cada
+  mudança com uma busca pelos identificadores dos 3 projetos (zero ocorrências).
+- **Estrutura MVC com default e critérios de adaptação:** mapeamento de diretórios para
+  Python/Flask, Node/Express e notas para outras stacks; monolito → criar camadas; projeto com
+  camadas parciais → preservar o que já cumpre as regras e mover só o necessário.
+- **Scripts genéricos:** só `sh`, `git`, `curl`, `find`, `awk`, `sed`; todo valor de projeto
+  (diretório, porta, URL, plano de requisições) entra por argumento; família de linguagem
+  detectada por extensões com mapa extensível.
+- **Mesma pasta nos 3 projetos**, byte a byte, provada por `diff -r`.
+
+## Como Executar
+
+### Pré-requisitos
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) instalado e autenticado
+  (`claude --version`; `claude` abre a sessão e pede login se necessário).
+- `git`, `curl`, `python3` (com o módulo `venv`) e `node` + `npm` no `PATH`.
+- Portas livres: `5000` (projetos 1 e 3) e `3000` (projeto 2). No macOS, o **Receptor AirPlay**
+  ocupa a porta 5000 — desative em Ajustes do Sistema → Geral → AirDrop e Handoff. Conferir com
+  `lsof -nP -iTCP:5000 -sTCP:LISTEN` (sem saída = livre).
+- Cada projeto sem alterações pendentes no git (é o ponto de restauração da Fase 3).
+
+A skill instala as dependências do projeto sozinha, só no ambiente isolado do próprio projeto
+(`.venv/` em Python, `node_modules/` em Node), ambos ignorados pelo git.
+
+### Executar a skill
+
+Inicie o Claude Code **dentro** do diretório do projeto (é assim que a skill de
+`.claude/skills/refactor-arch/` é carregada) e invoque `/refactor-arch`. Ordem recomendada
+1 → 2 → 3 (gera `reports/audit-project-1.md`, `-2.md`, `-3.md` sem argumentos):
+
+```bash
+cd code-smells-project && claude "/refactor-arch"
+```
+
+```bash
+cd ecommerce-api-legacy && claude "/refactor-arch"
+```
+
+```bash
+cd task-manager-api && claude "/refactor-arch"
+```
+
+Argumento opcional: o número do relatório (`claude "/refactor-arch 2"` grava
+`reports/audit-project-2.md` e `evidence/validation-project-2.md`). Sem argumento, a skill
+reutiliza o número de um relatório existente do mesmo projeto ou usa o próximo livre.
+
+### O que esperar em cada fase
+
+1. **Fase 1 — Análise:** banner `PHASE 1: PROJECT ANALYSIS` com linguagem, framework, banco,
+   domínio, arquitetura, número de arquivos-fonte, tabelas, endpoints e estado do ponto de
+   restauração, seguido do inventário de endpoints. Nada é alterado.
+2. **Fase 2 — Auditoria:** relatório `ARCHITECTURE AUDIT REPORT` (findings ordenados de CRITICAL
+   a LOW, com `arquivo:linha`), gravado automaticamente em `reports/audit-project-N.md`, e a
+   pergunta `Phase 2 complete. Proceed with refactoring (Phase 3)? [y/n]`. Responder `n` encerra
+   sem modificar nada. Com alterações pendentes no projeto, a skill imprime
+   `Phase 3 is blocked: …` no lugar da pergunta.
+3. **Fase 3 — Refatoração (após `y`):** a skill sobe a aplicação original e grava a linha de base
+   de comportamento de todos os endpoints, reestrutura o projeto para MVC, sobe a versão
+   refatorada, compara cada endpoint, reaudita o código (zero anti-patterns) e grava
+   `evidence/validation-project-N.md`. Termina com `PHASE 3: REFACTORING COMPLETE` ou, em falha,
+   `PHASE 3: REFACTORING FAILED` com diagnóstico e a oferta de reverter o projeto.
+
+### Como validar a refatoração
+
+- Leia `evidence/validation-project-N.md`: `Result: CLEAN`, trecho de boot, tabela de endpoints
+  (linha de base × depois, todos `✓` ou `declared`), mudanças de contrato declaradas e
+  `Remaining anti-patterns: 0`.
+- Suba a aplicação refatorada no ambiente isolado e chame endpoints:
+
+```bash
+cd code-smells-project && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python app.py
+```
+
+```bash
+curl -s http://127.0.0.1:5000/health
+```
+
+```bash
+cd ecommerce-api-legacy && npm start
+```
+
+```bash
+curl -s -X POST http://127.0.0.1:3000/api/checkout -H 'Content-Type: application/json' -d '{"usr":"Ana","eml":"ana@example.com","pwd":"senha","c_id":2,"card":"4111222233334444"}'
+```
+
+```bash
+cd task-manager-api && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python seed.py && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python app.py
+```
+
+```bash
+curl -s http://127.0.0.1:5000/tasks
+```
+
+  Endpoints administrativos protegidos pela refatoração exigem `ADMIN_TOKEN=<valor>` no ambiente
+  ao subir a aplicação e o cabeçalho `X-Admin-Token: <valor>` na requisição (ver "Declared
+  contract changes" de cada evidência). Depois de testar, apague os bancos locais gerados
+  (`*.db`, `instance/`) — são ignorados pelo git.
+- Compare a estrutura com a original: `git diff --stat 6d1ce62 -- <projeto>`.
+
+### Reverter e reexecutar
+
+- Em falha da Fase 3, responda `y` à pergunta `Revert project to the restore point? [y/n]`; a
+  skill restaura o projeto ao `HEAD` preservando `.claude/`, `reports/`, `evidence/` e o ambiente
+  isolado.
+- Para reexecutar do zero um projeto já refatorado e commitado, restaure a linha de base do código
+  (commit `6d1ce62`) fora de `.claude/`, commite e invoque a skill de novo:
+
+```bash
+git checkout 6d1ce62 -- code-smells-project/app.py code-smells-project/controllers.py code-smells-project/models.py code-smells-project/database.py
+```
