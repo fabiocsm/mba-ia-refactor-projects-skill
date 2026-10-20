@@ -9,7 +9,7 @@
 # Preserva:   .claude/ (a skill), arquivos ignorados pelo git (ambiente isolado de dependências)
 #             e tudo fora do diretório do projeto (reports/, evidence/).
 # Saída:      REVERTED=yes e HEAD=<sha curto>
-# Depende de: git
+# Depende de: git, find, sort
 # Exit codes: 0 revertido; 2 uso inválido ou diretório fora de um repositório git;
 #             3 dependência ausente ou falha do git.
 
@@ -26,6 +26,10 @@ git rev-parse --verify -q HEAD >/dev/null || { echo "error: repository has no co
 
 git restore --source=HEAD --staged --worktree -- . ':(exclude).claude' || { echo "error: git restore failed" >&2; exit 3; }
 git clean -fd -q -- . ':(exclude).claude' || { echo "error: git clean failed" >&2; exit 3; }
+# Diretórios que ficaram vazios (ex.: continham só caches ignorados já removidos) não pertencem ao
+# ponto de restauração; remove-os, sem tocar em .git/, .claude/ nem no ambiente isolado.
+find . -mindepth 1 \( -name .git -o -name .claude -o -name .venv -o -name venv -o -name node_modules \) -prune \
+    -o -type d -empty -print | sort -r | while IFS= read -r d; do rmdir "$d" 2>/dev/null; done
 
 echo "REVERTED=yes"
 echo "HEAD=$(git rev-parse --short HEAD)"

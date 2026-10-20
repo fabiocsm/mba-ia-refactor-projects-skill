@@ -143,7 +143,7 @@ os passos 1–3 abaixo são executados por um **subagente com contexto limpo** (
 agentes do Claude Code), que recebe apenas: o caminho do projeto, o caminho de
 `references/anti-patterns-catalog.md`, o caminho do relatório da Fase 2, a lista de endpoints da
 linha de base com seus shapes e a instrução de ler o código original com `git show HEAD:<arquivo>`
-(somente leitura). O subagente não altera arquivos: devolve a lista de findings e de divergências
+(somente leitura). O subagente não altera arquivos nem executa código do projeto: devolve a lista de findings e de divergências
 de contrato com `arquivo:linha`. Você corrige e chama um **novo** subagente até a resposta vir
 vazia. Se a ferramenta de agentes não estiver disponível, faça os passos você mesmo, com o mesmo
 rigor, e registre isso na evidência (`Reviewer: self`).
