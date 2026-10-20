@@ -359,6 +359,10 @@ app.use(createLoanRoutes(loanController));
   3. Remover `try/except` genéricos dos handlers; manter apenas capturas estreitas (ex.:
      violação de unicidade → `ConflictError`) e rollback que relança.
   4. Não alterar as respostas padrão do framework para rotas inexistentes (404/405).
+  5. Quando o contrato original tem uma resposta de erro **explícita** que depende de uma exceção
+     (ex.: devolver a mensagem do erro do banco, ou `{"status": "error"}` no health check),
+     reproduza-a capturando só o tipo de exceção do driver (`sqlite3.Error`, `SQLAlchemyError`)
+     no controller ou convertendo-a em `AppError` com o mesmo corpo — nunca `except Exception`.
 
 Antes (Python):
 

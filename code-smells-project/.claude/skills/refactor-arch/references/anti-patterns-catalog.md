@@ -343,6 +343,10 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
     violação de unicidade → 409).
   - `try/except` que faz rollback e **relança** a exceção.
   - O próprio tratador central.
+  - Captura **estreita** do tipo de exceção do driver/biblioteca (`sqlite3.Error`,
+    `SQLAlchemyError`, erro do cliente HTTP) usada para reproduzir uma resposta de erro
+    **explícita** do contrato original (ex.: endpoint que já devolvia a mensagem do erro do banco
+    ou um status de saúde "erro") — nunca `Exception`/`except:` genéricos.
 - **Impacto:** detalhes internos vazam para o cliente; erros ficam invisíveis; respostas de erro
   inconsistentes.
 
