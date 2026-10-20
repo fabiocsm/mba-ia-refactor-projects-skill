@@ -36,6 +36,9 @@ relatório).
    uma verificação falhar — ou se você notar algo a corrigir —, declare FALHA, diagnostique e
    ofereça reversão. Corrigir e "validar de novo" invalida a execução.
 6. Nunca declare sucesso sem evidência da validação.
+7. **Não altere o estado do repositório git:** proibido `git stash`, `switch`,
+   `reset`, `restore`, `add`, `commit`, `clean` no projeto. Única exceção: `revert-project.sh`
+   após falha e confirmação do usuário.
 
 ## Idioma e formato
 
@@ -51,7 +54,7 @@ Copie e mantenha atualizado durante a execução:
 - [ ] Phase 2: all source files audited, report printed and saved
 - [ ] Phase 2: confirmation asked (or block message printed) — STOP
 - [ ] Phase 3: restore point ok, work dir created, isolated environment ready
-- [ ] Phase 3: behavior baseline captured (runtime artifacts removed)
+- [ ] Phase 3: behavior baseline captured on the ORIGINAL code — before reading guidelines/playbook or editing
 - [ ] Phase 3: refactoring applied for every finding (MVC structure)
 - [ ] Phase 3: self-review done (pre-re-audit, contract by code, syntax) — last chance to edit
 - [ ] Phase 3: single-attempt validation — fingerprint, boot, endpoints, re-audit, fingerprint
@@ -160,13 +163,21 @@ projeto alterado; pergunta (ou bloqueio) como última linha.
 **Objetivo:** reestruturar para MVC eliminando todos os findings, provar que a aplicação continua
 funcionando e gravar a evidência.
 
+A ordem abaixo é obrigatória. **Gate de ordem:** até imprimir a linha
+`Behavior baseline captured: …` (passo 2), leia apenas `references/validation-protocol.md` e
+não crie, altere nem remova nenhum arquivo do projeto.
+
 1. **Preparação** — leia `references/validation-protocol.md` e siga §1–§2: ponto de restauração
    `ok` (senão, mensagem de bloqueio da Fase 2 e fim), diretório `WORK` com `mktemp -d`, versão da
    skill, ambiente isolado.
-2. **Linha de base de comportamento** — §3–§5 do protocolo com a aplicação **original**: plano de
-   requisições, verificação de porta, setup, boot, probe, parada e remoção dos artefatos de
-   runtime. Nenhum arquivo do projeto é modificado antes deste passo terminar.
-3. **Refatoração** — leia `references/mvc-guidelines.md` e `references/refactoring-playbook.md`.
+2. **Linha de base de comportamento** — §3–§5 do protocolo com a aplicação **original**, tal como
+   está no ponto de restauração: plano de requisições, verificação de porta, setup, boot, probe,
+   parada e remoção dos artefatos de runtime. Ao terminar, imprima
+   `Behavior baseline captured: <k>/<k> endpoints (Source: captured|inferred)`.
+   Se você perceber que alterou algum arquivo do projeto antes desta linha, a execução já falhou:
+   vá para o fluxo de falha (protocolo §10) com `Failure type: skill`.
+3. **Refatoração** — só agora leia `references/mvc-guidelines.md` e
+   `references/refactoring-playbook.md`.
    - Escolha a estrutura alvo conforme o nível de organização (guidelines §3–§4).
    - Aplique os `TP-NN` de **todos** os findings do relatório, na ordem segurança → estrutura →
      qualidade, preservando o contrato externo (guidelines §5).

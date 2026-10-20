@@ -98,7 +98,10 @@ Use este procedimento **idêntico** para a aplicação original (linha de base) 
 
 ## 5. Linha de base de comportamento
 
-Executada **depois** da confirmação e **antes** de qualquer modificação:
+Executada **depois** da confirmação e **antes** de qualquer modificação — sobre o código exatamente
+como está no ponto de restauração. Nunca capture a linha de base depois de começar a refatorar
+nem recupere o original com comandos git (`stash`, `switch`, `restore`); se isso acontecer, a execução
+falhou (§10):
 
 1. Ambiente isolado (§2), plano (§3) e procedimento de execução (§4) com a aplicação original.
 2. Para cada requisição de `OUT`, registre `status` e `shape` (§6).
@@ -171,6 +174,9 @@ Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorad
      (`skill`).
 
 ## 8. Reauditoria
+
+A reauditoria oficial é a verificação (c) da validação: uma **nova leitura completa**, feita
+depois do probe e antes do fingerprint final. Não reaproveite o resultado da autorrevisão (§7.1).
 
 1. Rode `count-source-files.sh <projeto>` para a nova lista de arquivos-fonte.
 2. Leia **todos** os arquivos e aplique o catálogo completo (`anti-patterns-catalog.md`) com os
