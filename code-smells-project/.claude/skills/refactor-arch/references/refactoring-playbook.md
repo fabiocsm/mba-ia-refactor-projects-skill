@@ -242,6 +242,28 @@ def create_loan(member_id, book_id):
     return loan_model.create_and_reserve(member_id, book).to_dict()
 ```
 
+Antes (Python, Flask-SQLAlchemy — consulta ORM no controller também é AP-06):
+
+```python
+# controllers/loan_controller.py
+def overdue_loans():
+    return Loan.query.filter(Loan.due_date < utc_now(), Loan.status == "open").all()
+```
+
+Depois (Python, Flask-SQLAlchemy):
+
+```python
+# models/loan.py
+class Loan(db.Model):
+    @classmethod
+    def find_overdue(cls, now):
+        return cls.query.filter(cls.due_date < now, cls.status == LOAN_STATUS_OPEN).all()
+
+# controllers/loan_controller.py
+def overdue_loans():
+    return [loan.to_dict() for loan in Loan.find_overdue(utc_now())]
+```
+
 Antes (Node):
 
 ```js
