@@ -242,12 +242,14 @@ def create_loan(member_id, book_id):
     return loan_model.create_and_reserve(member_id, book).to_dict()
 ```
 
-Antes (Python, Flask-SQLAlchemy — consulta ORM no controller também é AP-06):
+Antes (Python, Flask-SQLAlchemy — consulta reutilizada, com regra e literais, no handler de rota):
 
 ```python
-# controllers/loan_controller.py
+# views/loan_routes.py
+@bp.route("/loans/overdue")
 def overdue_loans():
-    return Loan.query.filter(Loan.due_date < utc_now(), Loan.status == "open").all()
+    loans = Loan.query.filter(Loan.due_date < datetime.utcnow(), Loan.status == "open").all()
+    return jsonify([loan.to_dict() for loan in loans])
 ```
 
 Depois (Python, Flask-SQLAlchemy):
@@ -259,9 +261,15 @@ class Loan(db.Model):
     def find_overdue(cls, now):
         return cls.query.filter(cls.due_date < now, cls.status == LOAN_STATUS_OPEN).all()
 
-# controllers/loan_controller.py
+# controllers/loan_controller.py (usar a API do model ORM no controller é aceito; consultas
+# reutilizadas ficam melhor como classmethods do model)
 def overdue_loans():
     return [loan.to_dict() for loan in Loan.find_overdue(utc_now())]
+
+# views/loan_routes.py
+@bp.route("/loans/overdue")
+def overdue_loans():
+    return jsonify(loan_controller.overdue_loans()), 200
 ```
 
 Antes (Node):
@@ -763,8 +771,11 @@ logger.info("Payment processed", { loanId, cardLast4: card.slice(-4) });
 
 - **Resolve:** AP-17 · **Camada destino:** constants/config · **Risco de contrato:** nenhum
 - **Passos:** criar um módulo de constantes (por domínio ou global) com nomes que expliquem a
-  regra; substituir todos os literais de negócio e listas de valores válidos; reutilizar
-  constantes que já existem no projeto em vez de criar novas.
+  regra; substituir todos os literais de negócio e listas de valores válidos — inclusive dentro
+  de filtros e consultas (`filter_by(status="done")`, `WHERE status = 'open'` com o valor fixo
+  no texto) e de métodos de model; reutilizar constantes que já existem no projeto em vez de
+  criar novas. Ao terminar, busque no projeto cada valor de domínio (status, papéis, tipos) e
+  confirme que só aparece no módulo de constantes, no schema e em dados de seed.
 
 Antes (Python):
 
