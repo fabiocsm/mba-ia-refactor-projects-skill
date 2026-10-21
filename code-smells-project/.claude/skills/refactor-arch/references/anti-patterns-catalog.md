@@ -199,8 +199,8 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
 
 - **Severidade:** HIGH · **Categoria:** arquitetura · **Transformações:** TP-04
 - **Sinais de detecção:**
-  - Controller/service (camada de regras) que executa SQL ou ORM diretamente em vez de chamar um
-    model (`db.execute(...)`, `cursor.execute(...)`, `Model.query...` dentro do controller).
+  - Controller/service (camada de regras) que executa SQL diretamente em vez de chamar um model
+    (`db.execute(...)`, `cursor.execute(...)`, `session.execute(text(...))` dentro do controller).
   - Handler de rota (função decorada com `@app.route`/`@bp.route`, registrada com
     `add_url_rule`, callback de `app.get/post/...` ou `router.<verbo>`) que, além de ler o
     request e devolver a resposta: executa consultas SQL/ORM diretamente; calcula valores de
@@ -210,6 +210,9 @@ A severidade de um finding é sempre a do anti-pattern no catálogo; não a ajus
 - **Falsos positivos:**
   - Handler que só faz: extrair parâmetros → chamar validador → chamar controller → serializar
     o resultado/mapear erro para status HTTP.
+  - Controller que usa a API de consulta do próprio model ORM (padrão Active Record:
+    `Model.query.filter_by(...)`, `db.session.get(Model, id)`, `select(Model)`): o model ORM é a
+    camada de dados. Em handlers de rota, qualquer consulta continua sendo finding.
   - Validação de formato na borda delegada a um validador (ver TP-08).
 - **Impacto:** regra de negócio presa ao framework HTTP; impossível reutilizar ou testar sem
   subir o servidor.
