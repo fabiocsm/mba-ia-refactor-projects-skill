@@ -149,12 +149,19 @@ de `py_compile`, linters, compiladores ou ferramentas que gravem caches; só lei
 de detecção que casa e `arquivo:linha`, já descontados os falsos positivos; e (b) divergências de
 contrato dentro do escopo do passo 3. Sugestões de estilo ou melhorias fora do catálogo não são
 reportadas. Sinais que costumam escapar e devem ser verificados um a um: SQL fora de `models/`
-(`execute`, `text(...)`) e qualquer consulta em handlers de rota — AP-06; APIs da tabela do AP-15 na
-versão de referência; literais de domínio em condições e filtros (`status == "done"`) — AP-17. **Limite de 3 rodadas:** se a 3ª rodada ainda trouxer itens, corrija-os e siga para a
-validação (§7.2) — a reauditoria oficial decide o resultado: devolve a lista de findings e de divergências
-de contrato com `arquivo:linha`. Você corrige e chama um **novo** subagente até a resposta vir
-vazia. Se a ferramenta de agentes não estiver disponível, faça os passos você mesmo, com o mesmo
-rigor, e registre isso na evidência (`Reviewer: self`).
+(`execute`, `text(...)`) e qualquer consulta em handlers de rota — AP-06; APIs da tabela do AP-15
+na versão de referência; literais de domínio em condições e filtros (`status == "done"`) — AP-17;
+imports e nomes atribuídos no módulo sem uso — AP-20.
+
+**Ciclo de correção.** Você corrige o que o subagente apontar e chama um **novo** subagente, até a
+resposta vir vazia, com no máximo 3 rodadas completas. Se a 3ª rodada ainda trouxer itens,
+corrija-os e faça uma rodada final por um novo subagente **restrita aos arquivos alterados desde
+a 3ª rodada** (mesmos critérios); corrija o que ela apontar e siga para a validação (§7.2) — a
+reauditoria oficial decide o resultado. **Toda correção, em qualquer rodada,** termina com uma
+checagem sua de cada arquivo alterado: todo import e todo nome atribuído no módulo é usado e
+nenhum literal de domínio ficou fora das constantes. Se a ferramenta de agentes não estiver
+disponível, faça os passos você mesmo, com o mesmo rigor, e registre isso na evidência
+(`Reviewer: self`).
 
 1. **Pré-reauditoria completa:** execute os passos 1–5 de §8 (leitura arquivo por arquivo com a
    ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria

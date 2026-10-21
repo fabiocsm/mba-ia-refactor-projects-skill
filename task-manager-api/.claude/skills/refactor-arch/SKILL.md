@@ -192,8 +192,9 @@ não crie, altere nem remova nenhum arquivo do projeto.
    - **Autorrevisão obrigatória antes de validar** (protocolo §7.1), feita por um subagente
      revisor independente com contexto limpo: pré-reauditoria completa com o catálogo, matriz de
      validação, conferência do contrato de cada endpoint (inclusive caminhos de erro) contra o
-     código original. Repita com um novo subagente até não restar nada, no máximo 3 rodadas;
-     faça a verificação sintática. Corrija tudo aqui — é a última oportunidade de alterar o código.
+     código original. Repita com um novo subagente até não restar nada, no máximo 3 rodadas
+     completas mais uma rodada final restrita aos arquivos alterados depois da 3ª (protocolo
+     §7.1); faça a verificação sintática. Corrija tudo aqui — é a última oportunidade de alterar o código.
 4. **Validação** — protocolo §7.2–§8, tentativa única, com o mesmo plano e o mesmo estado
    inicial: fingerprint inicial, (a) boot, (b) endpoints vs. linha de base, (c) reauditoria com
    zero findings por um novo subagente revisor, (d) fingerprint final igual ao inicial. Da primeira inicialização em diante,
