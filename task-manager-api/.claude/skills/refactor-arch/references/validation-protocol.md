@@ -163,7 +163,7 @@ nenhum literal de domínio ficou fora das constantes. Se a ferramenta de agentes
 disponível, faça os passos você mesmo, com o mesmo rigor, e registre isso na evidência
 (`Reviewer: self`).
 
-1. **Pré-reauditoria completa:** execute os passos 1–5 de §8 (leitura arquivo por arquivo com a
+1. **Pré-reauditoria completa:** execute os passos 1–4 e 6 de §8 (leitura arquivo por arquivo com a
    ferramenta de leitura, registro em `WORK/self-review.md`), exatamente como na reauditoria
    oficial. Duplicações entre funções novas (validadores, mapeadores) contam.
 2. **Matriz de validação:** para cada endpoint que recebe corpo, query ou path params, escreva
@@ -183,10 +183,20 @@ disponível, faça os passos você mesmo, com o mesmo rigor, e registre isso na 
    status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
    ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
    exatamente o shape original.
-4. **Verificação sintática sem executar a aplicação e sem gravar caches:** Python
+4. **Varredura mecânica (você mesmo, depois de cada rodada de correções):** complemente a revisão
+   com buscas pontuais nos arquivos-fonte e justifique ou corrija cada ocorrência:
+   - cada valor de domínio (status, papéis, tipos, prefixos de regra) como literal entre aspas,
+     ex.: `grep -rnE "['\"](valor1|valor2)['\"]" <arquivos-fonte>` — só pode restar no módulo
+     de constantes, no schema, em dados de seed, em chaves de resposta do contrato ou em
+     mensagens (AP-17);
+   - as APIs da tabela do AP-15 (ex.: `grep -rn "utcnow\|\.query\.get(" <arquivos-fonte>`);
+   - `print(`/`console.` fora do logger e de saída de scripts CLI (AP-19);
+   - `except Exception`/`except:`/`catch (` fora do handler central (AP-13 — só capturas
+     estreitas permitidas).
+5. **Verificação sintática sem executar a aplicação e sem gravar caches:** Python
    `.venv/bin/python -c "import sys; [compile(open(p, encoding='utf-8').read(), p, 'exec') for p in sys.argv[1:]]" <arquivos>`
    (não use `py_compile`, que grava `.pyc`); Node `node --check <arquivo>`.
-5. Corrija tudo o que encontrar e repita 1–4 até não restar nada. Só então siga para §7.2.
+6. Corrija tudo o que encontrar e repita até não restar nada. Só então siga para §7.2.
 
 ### 7.2 Validação (uma única tentativa — nenhuma correção)
 
@@ -230,12 +240,14 @@ o resultado da autorrevisão. O revisor é **somente leitura**: registra finding
    request (inclusive campos de elementos de listas) até o primeiro uso em comparação,
    aritmética, `len()`, consulta ou persistência e confirme a verificação de tipo antes; em cada
    laço, confirme que nenhuma chamada dentro dele executa consulta (direta ou via model).
-5. Registre em `WORK/reaudit.md` uma linha por arquivo: `<arquivo> — lido — <findings ou none>`.
+5. **Varredura mecânica:** execute as buscas do passo 4 de §7.1; toda ocorrência não justificada
+   pelas exceções listadas ali é finding.
+6. Registre em `WORK/reaudit.md` uma linha por arquivo: `<arquivo> — lido — <findings ou none>`.
    O número de linhas deve ser igual a `FILES`. Atenção especial a sinais que costumam sobrar
    em código novo: comparações/aritmética com campos do request sem verificação de tipo
    (AP-12), blocos repetidos entre funções novas (AP-14), literais de regra fora das constantes
    (AP-17).
-6. Resultado: `Remaining anti-patterns: 0` ou a lista `[SEV] <nome> (AP-NN) — <arquivo:linha>`.
+7. Resultado: `Remaining anti-patterns: 0` ou a lista `[SEV] <nome> (AP-NN) — <arquivo:linha>`.
    Qualquer item = FAILED.
 
 ## 9. Evidência
