@@ -532,7 +532,7 @@ A skill está em `.claude/skills/refactor-arch/` dentro de cada projeto. A cópi
 
 ```text
 .claude/skills/refactor-arch/
-├── SKILL.md                         # orquestração das 3 fases (230 linhas de corpo)
+├── SKILL.md                         # orquestração das 3 fases (241 linhas de corpo)
 ├── references/
 │   ├── project-analysis.md          # área 1 — análise de projeto (Fase 1)
 │   ├── anti-patterns-catalog.md     # área 2 — 20 anti-patterns (Fases 2 e 3)
@@ -644,9 +644,11 @@ seguintes): os três resultados entregues correspondem à mesma versão da skill
 ## Resultados
 
 Todas as execuções entregues usam a mesma versão da skill (conteúdo idêntico nos 3 projetos;
-commit `1ee20f3`, sincronizado em `b106f86`). Depois delas, a skill recebeu apenas uma correção de
-texto do glossário ("linha de base" → "linha de base de comportamento", commits `d4bfd29`/`d04d774`),
-sem mudança de comportamento; por decisão do autor, os projetos não foram reexecutados. Os resultados abaixo são os dos arquivos gravados
+commit `1ee20f3`, sincronizado em `b106f86`). Depois delas, a skill recebeu apenas correções de
+texto, sem mudança de comportamento: o glossário ("linha de base" → "linha de base de
+comportamento", commits `d4bfd29`/`d04d774` e, para a última ocorrência, `214406f`/`9efbbdf`) e
+um sumário no `SKILL.md` (`214406f`/`9efbbdf`). Por decisão do autor, os projetos não foram
+reexecutados. Os resultados abaixo são os dos arquivos gravados
 pela própria skill em [`reports/`](reports/) e [`evidence/`](evidence/).
 
 ### Findings por severidade

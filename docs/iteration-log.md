@@ -45,6 +45,7 @@ Regras:
 | 2026-10-23 | code-smells-project | **CLEAN — accepted, final version** (T041 rerun from the code baseline; transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
 | 2026-10-23 | ecommerce-api-legacy | **CLEAN — accepted, final version** (T041 rerun from the code baseline; transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
 | 2026-10-23 | (skill) | text-only change after the accepted runs, **no rerun** (author's decision) | 1ee20f3 / b106f86 | d4bfd29 / d04d774 | bare glossary term "linha de base" in `SKILL.md` and `references/validation-protocol.md` (constitution glossary rule) | wording | 15 occurrences qualified as "linha de base de comportamento"; paragraphs re-wrapped; no behavior change | false |
+| 2026-10-23 | (skill) | text-only change after the accepted runs, **no rerun** (author's decision) | d4bfd29 / d04d774 | 214406f / 9efbbdf | one bare "Linha de base" left in the `SKILL.md` references table (capitalized, missed by `d4bfd29`); `SKILL.md` had no table of contents (tasks.md global rule) | wording | `SKILL.md`: references table now says "Linha de base de comportamento"; "Sumário" added (body 241 lines); no behavior change | false |
 
 ## Testes controlados
 
