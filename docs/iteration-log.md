@@ -50,3 +50,4 @@ Regras:
 | date | project | test | result | notes |
 |---|---|---|---|---|
 | 2026-10-20 | code-smells-project | failure flow (US2 scenarios 4-5, SC-007) | passed with real FAILED runs (skill fe1e5c7, 1aa165d, 3e425ec, 247e987) | banner `PHASE 3: REFACTORING FAILED`, diagnosis, FAILED evidence, revert offer and `y` → project at the restore point with `.claude/`, `.venv/`, `reports/`, `evidence/` preserved; the synthetic worktree test of T035 was not needed |
+| 2026-10-23 | (repositório) | teste do leitor sem contexto (SC-014) — sessão nova do Claude Code guiada só pelo README | aprovado em 61 s | localizou Análise Manual, 3 relatórios, código refatorado, checklists, evidências, histórico e Como Executar; reproduziu a validação do projeto 2 (boot + checkout 200 igual à evidência); lacunas apontadas (lista completa de requisições e como parar o servidor) corrigidas no README |

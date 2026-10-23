@@ -829,7 +829,10 @@ reutiliza o número de um relatório existente do mesmo projeto ou usa o próxim
 - Leia `evidence/validation-project-N.md`: `Result: CLEAN`, trecho de boot, tabela de endpoints
   (linha de base × depois, todos `✓` ou `declared`), mudanças de contrato declaradas e
   `Remaining anti-patterns: 0`.
-- Suba a aplicação refatorada no ambiente isolado e chame endpoints:
+- Suba a aplicação refatorada no ambiente isolado e chame endpoints. Os comandos abaixo são
+  exemplos; a lista completa de endpoints exercitados pela skill, com status e formato esperados,
+  está na tabela "Behavior baseline" de cada `evidence/validation-project-N.md`. Para parar o
+  servidor, use `Ctrl+C` no terminal em que ele roda:
 
 ```bash
 cd code-smells-project && PYTHONDONTWRITEBYTECODE=1 .venv/bin/python app.py
