@@ -11,96 +11,96 @@ CRITICAL: 4 | HIGH: 3 | MEDIUM: 4 | LOW: 4
 ## Findings
 
 ### [CRITICAL] Hardcoded Credentials/Secrets (AP-01)
-File: src/utils.js:2, src/utils.js:3, src/utils.js:4
-Description: O objeto `config`, versionado no repositório, grava literais de credenciais de produção: senha de banco (`dbPass: "senha_super_secreta_prod_123"`), usuário de banco (`dbUser: "admin_master"`) e chave de gateway de pagamento com prefixo reconhecível (`paymentGatewayKey: "pk_live_1234567890abcdef"`).
-Impact: Qualquer pessoa com acesso ao repositório, a forks ou ao histórico git obtém credenciais de produção; trocar um segredo exige novo deploy.
-Recommendation: Ler os segredos de variáveis de ambiente sem default secreto, exclusivamente no composition root (TP-01).
+File: src/utils.js:3, src/utils.js:4
+Description: O objeto de configuração versionado traz a senha de banco em texto puro ("senha_super_secreta_prod_123") e a chave do gateway de pagamento com prefixo reconhecível ("pk_live_1234567890abcdef") como literais no código.
+Impact: Qualquer pessoa com acesso ao repositório obtém credenciais de produção e a chave do gateway de pagamento; a troca exige novo deploy e o segredo já está no histórico do git.
+Recommendation: Mover os valores para variáveis de ambiente sem default secreto e carregar via `process.env` (TP-01).
 
 ### [CRITICAL] God Class/God File (AP-03)
 File: src/AppManager.js:4-141
-Description: A classe `AppManager` concentra, no mesmo arquivo, a criação da conexão e do schema (`initDb`), o roteamento HTTP (`setupRoutes` com `app.post`/`app.get`/`app.delete`) e as regras de negócio com acesso a dados via SQL direto para 5 entidades (users, courses, enrollments, payments, audit_logs).
-Impact: Impossível testar roteamento, regra de negócio e acesso a dados isoladamente; qualquer alteração em uma entidade arrisca afetar as demais; responsabilidades indistinguíveis.
-Recommendation: Separar em camadas MVC — controllers finos, services com a regra de negócio e models com o acesso a dados (TP-03, TP-04).
+Description: A classe AppManager concentra, ao mesmo tempo, a criação da conexão com o banco e do schema (constructor, initDb), o roteamento HTTP (setupRoutes) e as regras de negócio de checkout e de relatório financeiro, todas acessando o SQLite diretamente dentro dos próprios handlers.
+Impact: Impossível testar roteamento, regras de negócio e acesso a dados isoladamente; qualquer mudança em uma responsabilidade arrisca afetar as demais; a classe cresce sem limite a cada novo recurso.
+Recommendation: Separar em camadas MVC — model(s) para acesso a dados, controllers para orquestração HTTP e services para as regras de negócio (TP-03, TP-04).
 
 ### [CRITICAL] Unprotected Administrative/Debug Endpoint (AP-04)
 File: src/AppManager.js:80
-Description: `GET /api/admin/financial-report` está sob prefixo `/admin` e devolve receita agregada e dados de alunos/pagamentos por curso sem qualquer verificação de autenticação ou autorização antes de montar a resposta.
-Impact: Qualquer cliente não autenticado lê dados financeiros e pessoais privilegiados da operação.
-Recommendation: Exigir credencial/token de administrador lido do ambiente (sem default) antes de processar a rota (TP-14).
+Description: A rota GET /api/admin/financial-report expõe dados agregados privilegiados (receita por curso, lista de alunos e valores pagos) sob o prefixo /admin sem qualquer verificação de autenticação ou autorização.
+Impact: Qualquer cliente não autenticado lê o relatório financeiro completo da plataforma, incluindo receita e dados de alunos.
+Recommendation: Exigir credencial/autorização de administrador lida do ambiente antes de executar a rota, desabilitada por padrão (TP-14).
 
 ### [CRITICAL] Plaintext or Weak Password Storage (AP-05)
-File: src/utils.js:17-23, src/AppManager.js:68
-Description: `badCrypto` "hasheia" a senha concatenando 10000 vezes um trecho de codificação Base64 reversível (sem salt, sem KDF), e o checkout aplica uma senha padrão literal `"123456"` quando o cliente não envia nenhuma (`badCrypto(p || "123456")`).
-Impact: Vazamento do banco expõe (ou permite reverter) todas as senhas armazenadas, inclusive as criadas com a senha padrão previsível.
-Recommendation: Substituir por um KDF de senha com salt aleatório (ex.: scrypt/bcrypt) e eliminar a senha padrão implícita (TP-09).
+File: src/utils.js:17-23, src/AppManager.js:18, src/AppManager.js:68
+Description: A função badCrypto "hasheia" a senha repetindo uma codificação base64 reversível 10000 vezes e truncando o resultado — não é um algoritmo de hash com salt. Além disso, o seed grava a senha '123' sem passar por essa função, e o checkout aplica a senha padrão literal "123456" quando o cliente não envia uma.
+Impact: Qualquer vazamento do banco expõe efetivamente as senhas em texto reversível; usuários sem senha enviada ficam protegidos por uma senha padrão conhecida.
+Recommendation: Substituir por um KDF com salt (bcrypt/scrypt/argon2) e aplicar a mesma função também aos dados de seed, removendo a senha padrão literal (TP-09).
 
 ### [HIGH] Global Mutable State (AP-07)
-File: src/utils.js:9, src/utils.js:12-15, src/AppManager.js:59
-Description: `globalCache` é um objeto de módulo mutado a cada checkout concluído por `logAndCache` (`globalCache[key] = data`), compartilhado entre todas as requisições sem dono explícito nem ciclo de vida definido.
-Impact: Vazamento de estado entre requisições concorrentes, condições de corrida e testes interdependentes.
-Recommendation: Substituir o cache global por um componente com ciclo de vida definido, criado no composition root e injetado onde necessário (TP-05).
+File: src/utils.js:9-10, src/utils.js:14, src/AppManager.js:59
+Description: globalCache é um objeto de módulo mutado a cada chamada de logAndCache (chamada pelo checkout a cada requisição), compartilhando estado entre requisições concorrentes sem dono explícito.
+Impact: Vazamento de estado entre requisições e condições de corrida sob concorrência; impossível isolar em testes.
+Recommendation: Substituir o cache global por um estado com dono explícito, criado no composition root e injetado onde necessário (TP-05).
 
 ### [HIGH] Tight Coupling without Dependency Injection (AP-08)
-File: src/AppManager.js:4-7
-Description: `AppManager` instancia sua própria conexão (`this.db = new sqlite3.Database(':memory:')`) dentro do construtor, em vez de recebê-la por injeção.
-Impact: Impossível substituir o banco por um dublê em testes unitários; trocar de banco exige editar a mesma classe que contém a regra de negócio.
-Recommendation: Criar a conexão no composition root e injetá-la via construtor/parâmetro (TP-05).
+File: src/AppManager.js:2, src/AppManager.js:7, src/AppManager.js:45
+Description: AppManager instancia sua própria conexão SQLite no construtor (`new sqlite3.Database(':memory:')`) e lê a configuração global (`config.paymentGatewayKey`) diretamente do módulo utils, em vez de receber essas dependências.
+Impact: Impossível substituir o banco ou a configuração por dublês em testes; trocar de banco ou de fonte de configuração exige editar a classe de regras de negócio.
+Recommendation: Criar a conexão e a configuração no composition root e injetá-las via construtor (TP-05).
 
 ### [HIGH] Sensitive Data Exposure in Responses or Logs (AP-09)
 File: src/AppManager.js:45
-Description: O checkout registra em console o número completo do cartão recebido e a chave do gateway de pagamento (`console.log(\`Processando cartão ${cc} na chave ${config.paymentGatewayKey}\`)`).
-Impact: Dados de cartão (PCI) e segredo de gateway ficam expostos a qualquer leitor dos logs.
-Recommendation: Remover o dado sensível do log e, se necessário, registrar apenas identificadores não sensíveis através de um logger central (TP-15, TP-11).
+Description: O log `console.log` do checkout imprime o número completo do cartão informado pelo cliente e a chave do gateway de pagamento a cada requisição.
+Impact: Dados de cartão e a chave do gateway de pagamento ficam expostos a qualquer pessoa com acesso aos logs da aplicação.
+Recommendation: Remover o log do número do cartão e da chave do gateway; se necessário, registrar apenas um identificador não sensível via um logger central (TP-15, TP-11).
 
 ### [MEDIUM] N+1 Queries / Query inside Loop (AP-11)
 File: src/AppManager.js:92, src/AppManager.js:104, src/AppManager.js:106
-Description: `GET /api/admin/financial-report` executa uma consulta de matrículas por curso dentro de `courses.forEach` (linha 92) e, para cada matrícula, mais duas consultas (usuário e pagamento) dentro de `enrollments.forEach` (linhas 104 e 106), multiplicando o número de queries pelo volume de dados.
-Impact: Latência cresce linearmente com o número de cursos/matrículas; o relatório fica inviável em produção com dados reais.
-Recommendation: Substituir os laços por consultas com `JOIN`/`GROUP BY` que tragam os dados agregados em poucas queries (TP-07).
+Description: O relatório financeiro executa uma consulta de matrículas por curso dentro do `forEach` de cursos, e dentro dela uma consulta de usuário e uma de pagamento por matrícula — uma cadeia de N+1 consultas que cresce com o volume de cursos, matrículas e pagamentos.
+Impact: O número de consultas ao banco cresce linearmente com o volume de dados, aumentando a latência do relatório proporcionalmente ao catálogo e à base de alunos.
+Recommendation: Substituir pelas consultas com JOIN (cursos + matrículas + usuários + pagamentos) em uma única operação (TP-07).
 
 ### [MEDIUM] Missing Input Validation (AP-12)
 File: src/AppManager.js:29-35, src/AppManager.js:46
-Description: Os campos do corpo do checkout (`usr`, `eml`, `pwd`, `c_id`, `card`) só são checados quanto à presença (linha 35), nunca quanto ao tipo; `cc.startsWith("4")` (linha 46) assume que `card` é string e lança excessão não tratada (erro 500) se o cliente enviar outro tipo.
-Impact: Entradas malformadas derrubam a requisição com erro 500 em vez de uma resposta 400 controlada.
-Recommendation: Validar o tipo de cada campo do corpo antes de usá-lo, com um validador na borda (TP-08).
+Description: O corpo do checkout só é validado com checagem de truthy (`!u || !e || !cid || !cc`), sem verificar o tipo dos campos; `cc.startsWith("4")` assume que `card` é uma string, o que gera erro 500 se o cliente enviar outro tipo (número, objeto, array).
+Impact: Entradas com tipos inesperados no corpo da requisição derrubam o handler com erro 500 em vez de uma resposta 400 controlada.
+Recommendation: Validar o tipo de cada campo do corpo na borda antes de usá-los (TP-08).
 
 ### [MEDIUM] Scattered or Generic Error Handling (AP-13)
-File: src/AppManager.js:41, src/AppManager.js:51, src/AppManager.js:55, src/AppManager.js:70, src/AppManager.js:84, src/AppManager.js:133-136
-Description: Cada callback do driver SQLite repete seu próprio `if (err) return res.status(500).send("Erro ...")` com mensagem genérica; em `DELETE /api/users/:id` (linhas 133-136) o `err` do callback é completamente ignorado; não existe middleware central de erro em nenhum ponto da aplicação (`src/app.js`).
-Impact: Comportamento de erro inconsistente entre rotas, falhas silenciosas na exclusão de usuário e ausência de um ponto único para padronizar respostas de erro.
-Recommendation: Centralizar o tratamento de erro em um middleware do Express e encaminhar falhas com `next(err)` (TP-06).
+File: src/AppManager.js:38, src/AppManager.js:57, src/AppManager.js:92, src/AppManager.js:104, src/AppManager.js:106, src/AppManager.js:133
+Description: O parâmetro `err` dos callbacks do driver sqlite3 é ignorado em vários pontos (inserção de log de auditoria, consulta de matrículas, de usuário e de pagamento no relatório, exclusão de usuário), e em outro ponto um erro de banco é confundido com "curso não encontrado" (404). Não existe um tratador de erro central no Express.
+Impact: Erros de banco silenciados geram respostas de sucesso incorretas (ex.: checkout concluído sem log de auditoria) ou exceções não tratadas; respostas de erro inconsistentes entre rotas.
+Recommendation: Verificar e tratar `err` em todo callback e adicionar um middleware de erro central no Express (TP-06).
 
 ### [MEDIUM] Callback Hell (AP-16)
-File: src/AppManager.js:26-78, src/AppManager.js:80-129
-Description: O checkout aninha callbacks em até 5 níveis (`db.get` → `db.get` → `db.run` → `db.run` → `db.run`) e usa `const self = this` (linha 26) para contornar `this` nos callbacks aninhados; o relatório financeiro sincroniza callbacks paralelos de dois laços com contadores manuais (`coursesPending--`, `enrPending--`).
-Impact: Fluxo difícil de acompanhar, risco de respostas duplicadas ou nunca enviadas, e erros fáceis de perder entre os níveis de aninhamento.
-Recommendation: Reescrever o fluxo com `async`/`await` sobre uma API de banco baseada em Promises (TP-13).
+File: src/AppManager.js:25-78, src/AppManager.js:83-128
+Description: O checkout encadeia seis níveis de callbacks aninhados do driver sqlite3 e usa `const self = this` (linha 26) para contornar `this` nos callbacks; o relatório financeiro aninha três níveis de callbacks e sincroniza as chamadas paralelas com contadores manuais (`coursesPending--`, `enrPending--`).
+Impact: Fluxo de controle difícil de acompanhar, alto risco de respostas duplicadas ou nunca enviadas, e erros perdidos nos callbacks não verificados.
+Recommendation: Reescrever os fluxos com `async`/`await` sobre uma API baseada em Promises (TP-13).
 
 Deprecated APIs: none detected
 
 ### [LOW] Magic Numbers/Strings (AP-17)
-File: src/AppManager.js:46, src/AppManager.js:108, src/utils.js:19
-Description: O literal `"4"` define a regra de aprovação do cartão (linha 46), o literal `'PAID'` é repetido para decidir receita (linha 108) sem constante compartilhada com os demais usos do mesmo status, e o laço de `badCrypto` usa o número mágico `10000` (utils.js:19) sem nenhum significado nomeado.
-Impact: Regra de negócio opaca; alterar uma bandeira de cartão, um status ou o custo do hash exige caçar todas as cópias no código.
-Recommendation: Extrair os literais de domínio para constantes nomeadas e compartilhadas (TP-12).
+File: src/AppManager.js:46, src/AppManager.js:48, src/AppManager.js:108, src/utils.js:19-20, src/utils.js:22
+Description: O prefixo "4" do cartão e os literais de status "PAID"/"DENIED" são usados diretamente nas condições de checkout e do relatório; a função badCrypto usa os números mágicos 10000 (iterações), 2 e 10 (tamanhos de substring) sem nomeá-los.
+Impact: Regra de negócio e parâmetros do algoritmo ficam opacos; alterar um limite ou status exige caçar cada ocorrência no código.
+Recommendation: Extrair para constantes nomeadas (ex.: enum de status de pagamento, constantes de configuração do hashing) (TP-12).
 
 ### [LOW] Poor Naming (AP-18)
 File: src/AppManager.js:29-33, src/utils.js:17
-Description: As variáveis `u`, `e`, `p`, `cid` e `cc` carregam, respectivamente, usuário, e-mail, senha, id do curso e número do cartão sem nenhum nome descritivo; a função `badCrypto` nomeia explicitamente um algoritmo ruim em vez de descrever o comportamento que de fato implementa.
-Impact: Leitura lenta do fluxo de checkout e risco de interpretar errado o propósito de `badCrypto` ao reutilizá-la.
-Recommendation: Renomear para identificadores descritivos de domínio (TP-17).
+Description: Os parâmetros do checkout usam abreviações crípticas (`u`, `e`, `p`, `cid`, `cc`) que carregam dado de domínio (usuário, e-mail, senha, id do curso, cartão); a função `badCrypto` já declara no próprio nome que implementa uma criptografia inadequada.
+Impact: Leitura mais lenta do fluxo de checkout e risco de troca de parâmetros ao editar o código.
+Recommendation: Renomear para nomes de domínio (`username`, `email`, `password`, `courseId`, `cardNumber`) e para um nome que reflita a função real (`hashPassword`) (TP-17).
 
 ### [LOW] Print/Console Logging instead of Logger (AP-19)
-File: src/app.js:13, src/utils.js:13
-Description: O boot da aplicação (`console.log` com a porta, src/app.js:13) e `logAndCache` (`console.log` a cada chave salva no cache, src/utils.js:13) escrevem diretamente em `console.log` em vez de usar um logger configurável.
-Impact: Sem níveis de log, sem destino configurável e ruído em produção.
-Recommendation: Substituir por um logger central com níveis configuráveis (TP-11).
+File: src/app.js:13, src/AppManager.js:45, src/utils.js:13
+Description: A aplicação usa `console.log` para registrar o boot do servidor, o processamento do pagamento (incluindo dados sensíveis) e as escritas no cache, sem nenhum logger configurável.
+Impact: Sem níveis de log nem destino configurável; ruído em produção e dados sensíveis expostos em stdout.
+Recommendation: Introduzir um logger central com níveis configuráveis e usá-lo em vez de `console.log` (TP-11).
 
 ### [LOW] Unused Imports/Dead Code (AP-20)
-File: src/utils.js:10, src/utils.js:25, src/AppManager.js:2
-Description: `totalRevenue` é declarado em `utils.js:10`, exportado em `utils.js:25` e importado em `AppManager.js:2`, mas nunca lido nem atribuído em nenhum ponto do projeto.
-Impact: Código morto que sugere, de forma falsa, que a receita é acumulada nesse módulo.
-Recommendation: Remover a variável, sua exportação e sua importação (TP-18).
+File: src/AppManager.js:2, src/utils.js:2, src/utils.js:5, src/utils.js:10
+Description: `totalRevenue` é importado em AppManager.js mas nunca lido; `dbUser` e `smtpUser` são declarados no objeto de configuração mas nenhum outro ponto do projeto os referencia.
+Impact: Ruído de código morto e falsa impressão de que esses valores são usados em alguma integração real.
+Recommendation: Remover o import e os campos de configuração não utilizados (TP-18).
 
 ================================
 Total: 15 findings

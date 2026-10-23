@@ -42,6 +42,8 @@ Regras:
 | 2026-10-21 | task-manager-api | CLEAN by the skill, rejected on review (process correct); reverted with `revert-project.sh` | ef11280 | b106f86 | `services/report_service.py:34,44` compared `task.status == 'done'` (domain literal in a condition, no constant) — AP-17 | domain-literal checks relied on reviewer attention only | `references/validation-protocol.md` §7.1 step 4 and §8 step 5 (mechanical grep sweep for domain literals, AP-15 APIs, print/console, broad catches) (fix 1ee20f3, synced in b106f86) | false |
 | 2026-10-21 | task-manager-api | ABORTED — external (account session limit during phases 1-2, then machine reboot); no project change | b106f86 | b106f86 | — | external | none (rerun allowed) | true |
 | 2026-10-23 | task-manager-api | **CLEAN — accepted** (transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
+| 2026-10-23 | code-smells-project | **CLEAN — accepted, final version** (T041 rerun from the code baseline; transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
+| 2026-10-23 | ecommerce-api-legacy | **CLEAN — accepted, final version** (T041 rerun from the code baseline; transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
 
 ## Testes controlados
 
