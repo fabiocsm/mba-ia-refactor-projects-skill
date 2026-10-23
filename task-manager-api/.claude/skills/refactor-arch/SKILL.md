@@ -20,6 +20,17 @@ Audita e refatora para MVC o projeto do **diretório atual** (onde o Claude Code
 Nome do projeto = nome desse diretório. Argumento recebido: `$ARGUMENTS` (número opcional do
 relatório).
 
+## Sumário
+
+- [Regras não negociáveis](#regras-não-negociáveis)
+- [Idioma e formato](#idioma-e-formato)
+- [Checklist de progresso](#checklist-de-progresso)
+- [Referências](#referências)
+- [Scripts](#scripts)
+- [Phase 1](#phase-1)
+- [Phase 2](#phase-2)
+- [Phase 3](#phase-3)
+
 ## Regras não negociáveis
 
 1. Três fases, nesta ordem, sem pular nem fundir: Phase 1 → Phase 2 → (confirmação) → Phase 3.
@@ -76,7 +87,7 @@ Leia cada arquivo **quando a fase indicar**, por inteiro:
 | [references/report-template.md](references/report-template.md) | Template de relatório | Fase 2, antes de montar o relatório |
 | [references/mvc-guidelines.md](references/mvc-guidelines.md) | Guidelines de arquitetura MVC | Fase 3, antes de refatorar |
 | [references/refactoring-playbook.md](references/refactoring-playbook.md) | Playbook de refatoração | Fase 3, antes de refatorar |
-| [references/validation-protocol.md](references/validation-protocol.md) | Linha de base, validação, evidência, reversão | Fase 3, logo após a confirmação |
+| [references/validation-protocol.md](references/validation-protocol.md) | Linha de base de comportamento, validação, evidência, reversão | Fase 3, logo após a confirmação |
 
 ## Scripts
 
