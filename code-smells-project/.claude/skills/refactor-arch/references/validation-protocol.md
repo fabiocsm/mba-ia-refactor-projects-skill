@@ -59,15 +59,16 @@ do `probe-endpoints.sh` (`method<TAB>path<TAB>body-file-or-dash[<TAB>headers-fil
 4. **Ordem:** `read` → `create` → `update` → `delete` → `admin` (efeitos globais por último).
 5. **IDs:** leituras e atualizações usam ids dos dados iniciais (seed); remoções usam,
    preferencialmente, recursos criados antes no próprio plano (id previsto a partir do estado
-   inicial). Depois da captura da linha de base, confira nas respostas de criação que os ids
-   previstos se confirmaram; se não, ajuste o plano e recapture a linha de base (permitido:
-   nada foi modificado ainda).
+   inicial). Depois da captura da linha de base de comportamento, confira nas respostas de criação
+   que os ids previstos se confirmaram; se não, ajuste o plano e recapture a linha de base de
+   comportamento (permitido: nada foi modificado ainda).
 6. Corpos JSON em `WORK/body-<n>.json`. Nenhuma senha/segredo real: use valores de exemplo.
 
 ## 4. Procedimento de execução da aplicação
 
-Use este procedimento **idêntico** para a aplicação original (linha de base) e para a refatorada
-(validação). `SNAP`, `LOG` e `OUT` são arquivos em `WORK` com sufixo `baseline` ou `after`.
+Use este procedimento **idêntico** para a aplicação original (linha de base de comportamento) e para
+a refatorada (validação). `SNAP`, `LOG` e `OUT` são arquivos em `WORK` com sufixo `baseline` ou
+`after`.
 
 1. **Snapshot:** `workspace-artifacts.sh snapshot <projeto> <SNAP>`.
 2. **Porta:** determine host/porta de boot (literal no código ou variável de ambiente que a
@@ -93,21 +94,21 @@ Use este procedimento **idêntico** para a aplicação original (linha de base) 
 8. **Artefatos de runtime:** `workspace-artifacts.sh diff <projeto> <SNAP>`; remova cada caminho
    listado (`rm -rf -- <projeto>/<caminho>`) e registre a lista. Remova **apenas** os caminhos
    listados.
-9. **Conferir:** para a linha de base, `git status --porcelain -- .` no projeto deve continuar
-   vazio (fora de `.claude/`).
+9. **Conferir:** para a linha de base de comportamento, `git status --porcelain -- .` no projeto
+   deve continuar vazio (fora de `.claude/`).
 
 ## 5. Linha de base de comportamento
 
 Executada **depois** da confirmação e **antes** de qualquer modificação — sobre o código exatamente
-como está no ponto de restauração. Nunca capture a linha de base depois de começar a refatorar
-nem recupere o original com comandos git (`stash`, `switch`, `restore`); se isso acontecer, a execução
-falhou (§10):
+como está no ponto de restauração. Nunca capture a linha de base de comportamento depois de começar
+a refatorar nem recupere o original com comandos git (`stash`, `switch`, `restore`); se isso
+acontecer, a execução falhou (§10):
 
 1. Ambiente isolado (§2), plano (§3) e procedimento de execução (§4) com a aplicação original.
 2. Para cada requisição de `OUT`, registre `status` e `shape` (§6).
 3. `Source: captured`. Se o original não iniciar (boot falhou, sem relação com porta ocupada),
-   construa a linha de base lendo o código (status e chaves que cada handler devolve) e marque
-   `Source: inferred (<motivo>)`.
+   construa a linha de base de comportamento lendo o código (status e chaves que cada handler
+   devolve) e marque `Source: inferred (<motivo>)`.
 
 ## 6. Formato de resposta e comparação
 
@@ -130,7 +131,7 @@ Resultado por endpoint (todas as requisições do endpoint):
 |---|---|
 | `✓` | mesmo status e mesmo shape em todas as requisições |
 | `declared` | divergência que é exatamente uma mudança de contrato declarada (correção de segurança: campo sensível removido, endpoint administrativo protegido/desabilitado) |
-| `✗` | qualquer outra divergência — inclusive lista vazia onde a linha de base tinha itens e vice-versa, quando isso muda o shape |
+| `✗` | qualquer outra divergência — inclusive lista vazia onde a linha de base de comportamento tinha itens e vice-versa, quando isso muda o shape |
 
 ## 7. Validação pós-refatoração
 
@@ -138,20 +139,20 @@ Resultado por endpoint (todas as requisições do endpoint):
 
 Ainda dentro da etapa de refatoração, antes de iniciar a aplicação refatorada pela primeira vez.
 
-**Revisor independente.** Quem escreveu o código tende a não ver os próprios deslizes. Por isso
-os passos 1–3 abaixo são executados por um **subagente com contexto limpo** (ferramenta de
-agentes do Claude Code), que recebe apenas: o caminho do projeto, o caminho de
+**Revisor independente.** Quem escreveu o código tende a não ver os próprios deslizes. Por isso os
+passos 1–3 abaixo são executados por um **subagente com contexto limpo** (ferramenta de agentes do
+Claude Code), que recebe apenas: o caminho do projeto, o caminho de
 `references/anti-patterns-catalog.md`, o caminho do relatório da Fase 2, a lista de endpoints da
-linha de base com seus shapes e a instrução de ler o código original com `git show HEAD:<arquivo>`
-(somente leitura). O subagente não altera nem cria arquivos e não executa código do projeto — nada
-de `py_compile`, linters, compiladores ou ferramentas que gravem caches; só leitura de arquivos,
-`git show` e buscas. Ele reporta **apenas** (a) findings do catálogo, cada um com `AP-NN`, o sinal
-de detecção que casa e `arquivo:linha`, já descontados os falsos positivos; e (b) divergências de
-contrato dentro do escopo do passo 3. Sugestões de estilo ou melhorias fora do catálogo não são
-reportadas. Sinais que costumam escapar e devem ser verificados um a um: SQL fora de `models/`
-(`execute`, `text(...)`) e qualquer consulta em handlers de rota — AP-06; APIs da tabela do AP-15
-na versão de referência; literais de domínio em condições e filtros (`status == "done"`) — AP-17;
-imports e nomes atribuídos no módulo sem uso — AP-20.
+linha de base de comportamento com seus shapes e a instrução de ler o código original com `git show
+HEAD:<arquivo>` (somente leitura). O subagente não altera nem cria arquivos e não executa código do
+projeto — nada de `py_compile`, linters, compiladores ou ferramentas que gravem caches; só leitura
+de arquivos, `git show` e buscas. Ele reporta **apenas** (a) findings do catálogo, cada um com
+`AP-NN`, o sinal de detecção que casa e `arquivo:linha`, já descontados os falsos positivos; e (b)
+divergências de contrato dentro do escopo do passo 3. Sugestões de estilo ou melhorias fora do
+catálogo não são reportadas. Sinais que costumam escapar e devem ser verificados um a um: SQL fora
+de `models/` (`execute`, `text(...)`) e qualquer consulta em handlers de rota — AP-06; APIs da
+tabela do AP-15 na versão de referência; literais de domínio em condições e filtros (`status ==
+"done"`) — AP-17; imports e nomes atribuídos no módulo sem uso — AP-20.
 
 **Ciclo de correção.** Você corrige o que o subagente apontar e chama um **novo** subagente, até a
 resposta vir vazia, com no máximo 3 rodadas completas. Se a 3ª rodada ainda trouxer itens,
@@ -175,14 +176,14 @@ disponível, faça os passos você mesmo, com o mesmo rigor, e registre isso na 
    regras de formato/faixa que o original tinha precisam ser mantidas. Campo sem a regra exigida
    é AP-12: corrija o validador. Não acrescente rejeições que o original não fazia (contrato).
 3. **Conferência de contrato por leitura de código**, incluindo as respostas **explícitas** do
-   handler original que a linha de base não exercita (ex.: um `return` 404 de "não encontrado" ou
-   um 400 de validação com sua mensagem): no mesmo cenário, o refatorado devolve o mesmo status e
-   as mesmas chaves. Fora do escopo: comportamento do original com entradas malformadas que ele
-   tratava por acidente (exceções → 5xx, coerções implícitas de tipo, ordem incidental de
-   checagens) — ali a correção de AP-12/AP-13 prevalece (`mvc-guidelines.md` §5): para cada endpoint do inventário, compare
-   status e chaves que o novo handler devolve com o shape da linha de base. Toda diferença precisa
-   ser uma mudança declarada (correção de segurança) — senão, corrija o código para devolver
-   exatamente o shape original.
+   handler original que a linha de base de comportamento não exercita (ex.: um `return` 404 de "não
+   encontrado" ou um 400 de validação com sua mensagem): no mesmo cenário, o refatorado devolve o
+   mesmo status e as mesmas chaves. Fora do escopo: comportamento do original com entradas
+   malformadas que ele tratava por acidente (exceções → 5xx, coerções implícitas de tipo, ordem
+   incidental de checagens) — ali a correção de AP-12/AP-13 prevalece (`mvc-guidelines.md` §5): para
+   cada endpoint do inventário, compare status e chaves que o novo handler devolve com o shape da
+   linha de base de comportamento. Toda diferença precisa ser uma mudança declarada (correção de
+   segurança) — senão, corrija o código para devolver exatamente o shape original.
 4. **Varredura mecânica (você mesmo, depois de cada rodada de correções):** complemente a revisão
    com buscas pontuais nos arquivos-fonte e justifique ou corrija cada ocorrência:
    - cada valor de domínio (status, papéis, tipos, prefixos de regra) como literal entre aspas,
@@ -206,16 +207,15 @@ disponível, faça os passos você mesmo, com o mesmo rigor, e registre isso na 
    proibido reiniciar a validação. Não existe "refazer a validação depois de corrigir": se
    qualquer verificação falhar — ou se você perceber algo que precisaria corrigir —, o resultado
    é **FAILED** (§10). A aplicação refatorada é iniciada **uma única vez**.
-3. Endpoints protegidos por TP-14: gere um token aleatório para a execução (ex.:
-   `openssl rand -hex 16`), passe-o no boot (`ADMIN_TOKEN=<token>`) e crie
-   `WORK/headers-admin.txt` com `X-Admin-Token: <token>` (ou o cabeçalho definido no código);
-   esses endpoints usam a 4ª coluna do plano. Os demais campos do plano são idênticos aos da linha
-   de base.
+3. Endpoints protegidos por TP-14: gere um token aleatório para a execução (ex.: `openssl rand -hex
+   16`), passe-o no boot (`ADMIN_TOKEN=<token>`) e crie `WORK/headers-admin.txt` com `X-Admin-Token:
+   <token>` (ou o cabeçalho definido no código); esses endpoints usam a 4ª coluna do plano. Os
+   demais campos do plano são idênticos aos da linha de base de comportamento.
 4. Execute o procedimento §4 com a aplicação refatorada (mesmo setup, mesmo estado inicial).
 5. Verificações, todas obrigatórias:
    - **(a) Boot:** `READY=yes`, processo vivo e sem traceback/erro no `LOG` até o fim do probe.
-   - **(b) Endpoints:** compare cada endpoint com a linha de base (§6). Todo endpoint `✓` ou
-     `declared`; nenhum `✗`.
+   - **(b) Endpoints:** compare cada endpoint com a linha de base de comportamento (§6). Todo
+     endpoint `✓` ou `declared`; nenhum `✗`.
    - **(c) Reauditoria:** §8 com zero findings.
    - **(d) Integridade:** `workspace-artifacts.sh fingerprint <projeto>` ao final é igual a
      `FP_START` (prova de que nada foi alterado durante a validação). Diferente = FAILED
@@ -305,11 +305,11 @@ Remaining anti-patterns: 0 \| <lista>
 
 Regras: uma linha por endpoint do inventário (contagem = `Endpoints` da Fase 1); requisições
 múltiplas do mesmo endpoint aparecem na mesma linha (`200, 400`); `declared` exige linha
-correspondente em "Declared contract changes" que enumere **todas** as chaves/status que diferem
-da linha de base (uma chave removida e não listada torna o endpoint `✗`); sem mudanças, uma linha
-`none`; em `CLEAN`, omita
-a seção Diagnosis; em falha antes da validação (ex.: boot da linha de base sem porta livre),
-preencha o que foi executado e marque o resto como `not executed`.
+correspondente em "Declared contract changes" que enumere **todas** as chaves/status que diferem da
+linha de base de comportamento (uma chave removida e não listada torna o endpoint `✗`); sem
+mudanças, uma linha `none`; em `CLEAN`, omita a seção Diagnosis; em falha antes da validação (ex.:
+boot da linha de base de comportamento sem porta livre), preencha o que foi executado e marque o
+resto como `not executed`.
 
 ## 10. Fluxo de falha
 
