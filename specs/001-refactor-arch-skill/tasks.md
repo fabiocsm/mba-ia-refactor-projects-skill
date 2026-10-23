@@ -258,3 +258,11 @@ Task: "Implementar scripts/workspace-artifacts.sh, wait-for-http.sh, probe-endpo
 - Toda execução com falha: reverter → registrar em `docs/iteration-log.md` → corrigir a skill na cópia canônica → G2 → commit → G3 → reexecutar
 - Commits em Conventional Commits, granulares por etapa (constituição)
 - Publicar o fork no GitHub é ação do autor
+
+---
+
+## Phase 8: Convergence
+
+- [X] T052 CRITICAL: em `code-smells-project/.claude/skills/refactor-arch/SKILL.md:79` (tabela de referências), trocar "Linha de base, validação, evidência, reversão" por "Linha de base de comportamento, validação, evidência, reversão"; verificar com busca case-insensitive e com quebras de linha normalizadas que nenhum "linha de base" sem "de comportamento"/"do código" resta na skill; sincronizar as cópias de `ecommerce-api-legacy/` e `task-manager-api/` (`diff -r` vazio) e repetir o Gate G2; commitar `fix(skill): …` e `chore(skill): sync refactor-arch copies` per Constitution (Glossário obrigatório) / FR-004 (contradicts)
+- [X] T053 Adicionar um sumário curto no início do corpo de `code-smells-project/.claude/skills/refactor-arch/SKILL.md` (corpo continua < 500 linhas), sincronizar as 2 cópias (`diff -r` vazio) e fechar a observação 1 de `docs/constitution-review.md` per tasks.md "Regras globais" (sumário em arquivos > 100 linhas) (partial)
+- [X] T054 Corrigir `docs/constitution-review.md` (linha "Glossário obrigatório" e observação 2 afirmam a correção completa, mas `SKILL.md:79` ainda usava o termo sem qualificador) e registrar as novas versões da skill de T052–T053 em `docs/iteration-log.md` e na nota de versão de `## Resultados` do `README.md` como mudança só de texto sem reexecução, mantendo a decisão do autor sobre a T041 per T051 (partial)
