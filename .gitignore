@@ -10,3 +10,16 @@ venv/
 # SQLite
 *.db
 instance/
+
+# Spec Kit tooling (process support, not part of the deliverable).
+# Anchored to the repository root: the projects' .claude/skills/refactor-arch/ stay tracked,
+# and already tracked files (.specify/memory/constitution.md) are unaffected.
+/.claude/
+/.specify/.gitignore
+/.specify/init-options.json
+/.specify/integration.json
+/.specify/integrations/
+/.specify/memory/.constitution-template.json
+/.specify/scripts/
+/.specify/templates/
+/.specify/workflows/
