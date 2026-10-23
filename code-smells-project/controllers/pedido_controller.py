@@ -24,14 +24,9 @@ def criar_pedido(usuario_id, itens):
             )
         total = total + (produto["preco"] * quantidade)
 
-    pedido_id = pedido_model.criar(usuario_id, STATUS_PENDENTE, total)
-
-    pedido_model.adicionar_itens_em_lote(pedido_id, [
+    pedido_id = pedido_model.criar(usuario_id, STATUS_PENDENTE, total, [
         (item["produto_id"], item["quantidade"], produtos[item["produto_id"]]["preco"])
         for item in itens
-    ])
-    produto_model.decrementar_estoque_em_lote([
-        (item["produto_id"], item["quantidade"]) for item in itens
     ])
 
     logger.info("Pedido criado id=%s usuario_id=%s", pedido_id, usuario_id)

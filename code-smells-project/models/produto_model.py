@@ -59,16 +59,6 @@ def buscar_por_ids(produto_ids):
     return {row["id"]: _to_dict(row) for row in cursor.fetchall()}
 
 
-def decrementar_estoque_em_lote(itens):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.executemany(
-        "UPDATE produtos SET estoque = estoque - ? WHERE id = ?",
-        [(quantidade, produto_id) for produto_id, quantidade in itens],
-    )
-    db.commit()
-
-
 def buscar(termo, categoria=None, preco_min=None, preco_max=None):
     db = get_db()
     cursor = db.cursor()

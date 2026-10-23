@@ -39,25 +39,28 @@ _PEDIDOS_COM_ITENS_SQL = """
 """
 
 
-def criar(usuario_id, status, total):
+def criar(usuario_id, status, total, itens):
     db = get_db()
     cursor = db.cursor()
-    cursor.execute(
-        "INSERT INTO pedidos (usuario_id, status, total) VALUES (?, ?, ?)",
-        (usuario_id, status, total),
-    )
-    db.commit()
-    return cursor.lastrowid
-
-
-def adicionar_itens_em_lote(pedido_id, itens):
-    db = get_db()
-    cursor = db.cursor()
-    cursor.executemany(
-        "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES (?, ?, ?, ?)",
-        [(pedido_id, produto_id, quantidade, preco_unitario) for produto_id, quantidade, preco_unitario in itens],
-    )
-    db.commit()
+    try:
+        cursor.execute(
+            "INSERT INTO pedidos (usuario_id, status, total) VALUES (?, ?, ?)",
+            (usuario_id, status, total),
+        )
+        pedido_id = cursor.lastrowid
+        cursor.executemany(
+            "INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco_unitario) VALUES (?, ?, ?, ?)",
+            [(pedido_id, produto_id, quantidade, preco_unitario) for produto_id, quantidade, preco_unitario in itens],
+        )
+        cursor.executemany(
+            "UPDATE produtos SET estoque = estoque - ? WHERE id = ?",
+            [(quantidade, produto_id) for produto_id, quantidade, _ in itens],
+        )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+    return pedido_id
 
 
 def listar_por_usuario(usuario_id):
