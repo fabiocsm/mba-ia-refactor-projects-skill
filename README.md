@@ -629,7 +629,7 @@ sessão, revisão independente do código e smoke test) antes de ser aceita. Os 
 |---|---|---|
 | Relatório impresso ≠ gravado | o console omitiu os findings LOW que o arquivo tinha | a Fase 2 grava primeiro e imprime relendo o arquivo; posição fixa da linha `Deprecated APIs: none detected` |
 | "Remendos" depois da validação | o agente corrigia o código após o primeiro boot e declarava CLEAN | validação de tentativa única + **fingerprint** do código no primeiro boot e no fim (`workspace-artifacts.sh fingerprint`) |
-| Ordem das etapas | refatorou antes de capturar a linha de base e usou `git stash` para voltar | gate de ordem com o marco `Behavior baseline captured`; proibição de comandos git que mudam estado |
+| Ordem das etapas | refatorou antes de capturar a linha de base de comportamento e usou `git stash` para voltar | gate de ordem com o marco `Behavior baseline captured`; proibição de comandos git que mudam estado |
 | Autoauditoria complacente | reauditorias aprovavam N+1, validação sem tipo e literais remanescentes | revisão e reauditoria por **subagentes com contexto limpo**, rastreabilidade de cada finding original, matriz de validação e **varredura mecânica** com `grep` |
 | Contradições entre catálogo e contrato | AP-12/AP-13 exigiam mudanças que quebrariam respostas do original | regras explícitas: só rejeições que evitam 5xx; capturas estreitas do driver para respostas de erro explícitas; diferenças pré-existentes são falso positivo |
 | Laço de revisão sem convergência | 11 rodadas de revisores apontando minúcias de entradas malformadas | escopo do contrato restrito às respostas explícitas, achados só do catálogo, limite de 3 rodadas + rodada final nos arquivos alterados |
@@ -660,7 +660,7 @@ encontrados pela skill.
 
 ### Validação (evidências gravadas pela skill)
 
-| Projeto | Resultado | Boot | Endpoints (linha de base `captured`) | Reauditoria | Fingerprint | Evidência |
+| Projeto | Resultado | Boot | Endpoints (linha de base de comportamento `captured`) | Reauditoria | Fingerprint | Evidência |
 |---|---|---|---|---|---|---|
 | code-smells-project | CLEAN | `python app.py` | 19/19 (16 ✓, 3 declared) | 0 anti-patterns | inalterado | [validation-project-1.md](evidence/validation-project-1.md) |
 | ecommerce-api-legacy | CLEAN | `npm start` | 3/3 (2 ✓, 1 declared) | 0 anti-patterns | inalterado | [validation-project-2.md](evidence/validation-project-2.md) |
@@ -827,7 +827,7 @@ reutiliza o número de um relatório existente do mesmo projeto ou usa o próxim
 ### Como validar a refatoração
 
 - Leia `evidence/validation-project-N.md`: `Result: CLEAN`, trecho de boot, tabela de endpoints
-  (linha de base × depois, todos `✓` ou `declared`), mudanças de contrato declaradas e
+  (linha de base de comportamento × depois, todos `✓` ou `declared`), mudanças de contrato declaradas e
   `Remaining anti-patterns: 0`.
 - Suba a aplicação refatorada no ambiente isolado e chame endpoints. Os comandos abaixo são
   exemplos; a lista completa de endpoints exercitados pela skill, com status e formato esperados,

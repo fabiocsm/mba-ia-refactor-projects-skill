@@ -172,7 +172,7 @@ independentes.
 - [X] T048 Gate G5 (quickstart §7): `reports/` com exatamente 3 arquivos; `evidence/` com exatamente 3 arquivos todos `Result: CLEAN`; README com seções A–D completas; `diff -r` vazio entre as 3 cópias da skill; nenhum `.venv/`, `node_modules/`, `*.db`, `.env` no índice (`git ls-files`); critérios de aceite 3/3
 - [X] T049 Revisar a matriz de rastreabilidade em `specs/001-refactor-arch-skill/plan.md` marcando cada uma das 31 linhas como verificada (com o artefato real) e conferir SC-001 a SC-008 da spec
 - [X] T050 [P] Remover o comentário "Sync Impact Report" do topo de `.specify/memory/constitution.md` (material de revisão, não governança) e commitar `docs: finalize constitution v2.2.0`
-- [ ] T051 Revisão de conformidade final com a constituição (Governance): percorrer cada regra DEVE/NÃO DEVE dos princípios I–VII e das Restrições do Entregável contra o repositório; registrar desvios corrigidos; deixar o branch pronto para o autor publicar o fork público no GitHub
+- [X] T051 Revisão de conformidade final com a constituição (Governance): percorrer cada regra DEVE/NÃO DEVE dos princípios I–VII e das Restrições do Entregável contra o repositório; registrar desvios corrigidos; deixar o branch pronto para o autor publicar o fork público no GitHub
 
 ---
 
