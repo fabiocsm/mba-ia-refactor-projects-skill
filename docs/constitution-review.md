@@ -15,7 +15,7 @@ Versão da skill entregue: conteúdo do commit `1ee20f3` (sincronizado nas 3 có
 | VI. Achados rastreáveis | ✅ com observação 3 | relatórios gravados pela skill, ordenados, Summary = Total, cobertura da Análise Manual 14/14, 15/15, 14/14 |
 | VII. Refatoração segura e comprovada | ✅ | evidências `CLEAN` com linha de base de comportamento `captured`, 19/19, 3/3, 22/22 endpoints, reauditoria 0, fingerprint inalterado; fluxo de falha e reversão verificados em execuções reais; nenhum `.env` criado |
 | Restrições do entregável | ✅ | skill só nos 3 projetos; 3 relatórios e 3 evidências; README A–D; Spec Kit fora dos projetos; nenhum arquivo ignorado ou segredo commitado |
-| Glossário obrigatório | ⚠️ observação 2 | README corrigido nesta revisão; a skill ainda usa "linha de base" sozinho |
+| Glossário obrigatório | ✅ | README e skill corrigidos (observação 2) |
 | Fluxo e gates G1–G5 | ✅ | G1–G5 executados; iterações registradas em `docs/iteration-log.md` com versão antes/depois |
 
 ## Desvios corrigidos nesta revisão
@@ -28,10 +28,11 @@ Versão da skill entregue: conteúdo do commit `1ee20f3` (sincronizado nas 3 có
 1. **Sumário no `SKILL.md`:** o arquivo tem 246 linhas sem sumário. A regra da constituição
    (Princípio II) se aplica aos arquivos de referência — todos têm sumário —, mas a regra global de
    `tasks.md` pede sumário em qualquer arquivo > 100 linhas.
-2. **Glossário na skill:** `SKILL.md:199` e 12 trechos de `references/validation-protocol.md` usam
-   "linha de base" significando "linha de base de comportamento". Corrigir é uma mudança só de
-   texto, mas altera a versão da skill; pela T041 os 3 projetos precisariam ser reexecutados para que
-   os resultados continuem correspondendo à versão entregue.
+2. **Glossário na skill — corrigido em `d4bfd29` (cópias sincronizadas em `d04d774`):** os 15 usos
+   de "linha de base" sem qualificador em `SKILL.md` e `references/validation-protocol.md` passaram a
+   "linha de base de comportamento". Mudança só de texto; por decisão do autor os 3 projetos não
+   foram reexecutados, então as evidências citam a versão anterior (`1ee20f3`/`b106f86`) — desvio
+   consciente da T041, registrado no README e em `docs/iteration-log.md`.
 3. **Formato de relatório e evidência gerados pela skill (não editados à mão):** o relatório do
    projeto 3 tem dois blocos AP-15 (um por API deprecated) em vez de um agrupado; a evidência do
    projeto 3 descreve as mudanças declaradas em inglês, enquanto o conteúdo deveria estar em

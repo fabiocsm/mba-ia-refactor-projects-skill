@@ -644,7 +644,9 @@ seguintes): os três resultados entregues correspondem à mesma versão da skill
 ## Resultados
 
 Todas as execuções entregues usam a mesma versão da skill (conteúdo idêntico nos 3 projetos;
-commit `1ee20f3`, sincronizado em `b106f86`). Os resultados abaixo são os dos arquivos gravados
+commit `1ee20f3`, sincronizado em `b106f86`). Depois delas, a skill recebeu apenas uma correção de
+texto do glossário ("linha de base" → "linha de base de comportamento", commits `d4bfd29`/`d04d774`),
+sem mudança de comportamento; por decisão do autor, os projetos não foram reexecutados. Os resultados abaixo são os dos arquivos gravados
 pela própria skill em [`reports/`](reports/) e [`evidence/`](evidence/).
 
 ### Findings por severidade

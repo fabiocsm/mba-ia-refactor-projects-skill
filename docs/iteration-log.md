@@ -44,6 +44,7 @@ Regras:
 | 2026-10-23 | task-manager-api | **CLEAN — accepted** (transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
 | 2026-10-23 | code-smells-project | **CLEAN — accepted, final version** (T041 rerun from the code baseline; transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
 | 2026-10-23 | ecommerce-api-legacy | **CLEAN — accepted, final version** (T041 rerun from the code baseline; transcript audit, independent review and smoke test passed) | b106f86 | — | — | — | — | false |
+| 2026-10-23 | (skill) | text-only change after the accepted runs, **no rerun** (author's decision) | 1ee20f3 / b106f86 | d4bfd29 / d04d774 | bare glossary term "linha de base" in `SKILL.md` and `references/validation-protocol.md` (constitution glossary rule) | wording | 15 occurrences qualified as "linha de base de comportamento"; paragraphs re-wrapped; no behavior change | false |
 
 ## Testes controlados
 
