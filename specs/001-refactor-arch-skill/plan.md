@@ -177,6 +177,13 @@ artefatos de entrega ficam na raiz (`reports/`, `evidence/`, `docs/`, `README.md
 | 30 | Critérios de aceite 3/3 (stack, ≥ 5 findings, ≥ 1 CRIT/HIGH, app funciona) | Execuções limpas | G5 |
 | 31 | Repositório público (fork) | GitHub `origin` | Ação do autor |
 
+**Verificação final (2026-10-23):** linhas 1–30 verificadas contra os artefatos reais — skill
+canônica e cópias idênticas (`diff -r`), Gate G2 (20 AP, 18 TP, corpo do `SKILL.md` com 230
+linhas, 0 identificadores dos alvos, 8 scripts), `reports/audit-project-{1,2,3}.md`,
+`evidence/validation-project-{1,2,3}.md` (todos `Result: CLEAN`, mesma versão da skill), código
+refatorado commitado, README seções A–D e `docs/iteration-log.md`. Linha 31 (fork público no
+GitHub) é ação do autor.
+
 ## Riscos e mitigação
 
 | Risco | Mitigação |
